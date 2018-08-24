@@ -45,11 +45,11 @@
         <div class="form-row">
           <div class="form-group col-md-6">
             <label for="inputAddress">Print Time</label>
-            <input type="text" class="form-control" name="part_serial" id="part_time" placeholder="123">
+            <input type="text" class="form-control" name="print_time" id="part_time" placeholder="123">
           </div>
           <div class="form-group col-md-6">
             <label for="inputAddress">Rec. Bagging</label>
-            <input type="text" class="form-control" name="part_serial" id="part_bagging" placeholder="20">
+            <input type="text" class="form-control" name="rec_bagging" id="part_bagging" placeholder="20">
           </div>
         </div>
         <div class="form-group">
@@ -72,9 +72,7 @@
       </form>
       @endif
     </div>
-    
-    
-    <div class="col-8">
+    <div class="col-9 ">
       <h3>
         Parts
       </h3>
@@ -88,7 +86,9 @@
             <th scope="col">Version</th>
             <th scope="col">Cleaned</th>
             <th scope="col">Weight</th>
-            <th scope="col">Inventory</th>
+            <th scope="col">Stock</th>
+            <th scope="col">Bags</th>
+            <th scope="col">Total</th>
             <th scope="col">View</th>
             <th scope="col">Edit</th>
           </tr>
@@ -96,8 +96,11 @@
         <tbody>
           @if(count($parts) > 0)
             @foreach($parts as $part)
-              <tr>
-                
+              @if($part->in_moratorium == 0)
+                <tr>
+              @else
+                <tr style="background-color: #bbb; opacity: 0.5">
+              @endif    
                 <td scope="row">{{date('d/m/y @ H:i', strtotime($part->updated_at))}}</td>
                 <td style="text-align: left !important;">{{$part->part_name}}</td>
                 <td>{{$part->part_serial}}</td>
@@ -110,8 +113,18 @@
                 @endif
                 <td>{{$part->part_weight}}g</td>
                 <td>{{$part->inventory}}</td>
-                <td><a href="{{route('parts.show', $part->id)}}" class="btn btn-sm btn-outline-secondary d-block">&#10070</a></td>
-                <td><a href="{{route('parts.edit', $part->id)}}" class="btn btn-sm btn-outline-info d-block">&#9998</a></td>
+                <td>{{$part->bag_count}}</td>
+                <td>{{$part->total}}</td>
+                @if($part->in_moratorium == 0)
+                  <td><a href="{{route('parts.show', $part->id)}}" class="btn btn-sm btn-outline-secondary d-block">&#10070</a></td>
+                @else
+                  @if(Auth::user()->account_type == 2)
+                    <td><a href="{{route('parts.show', $part->id)}}" class="btn btn-sm btn-outline-secondary d-block">&#10070</a></td>
+                  @endif
+                @endif
+                @if(Auth::user()->account_type == 2)
+                  <td><a href="{{route('parts.edit', $part->id)}}" class="btn btn-sm btn-outline-info d-block">&#9998</a></td>
+                @endif
               </tr>
             @endforeach 
           @else
@@ -125,7 +138,6 @@
         {{$parts->links()}}
       </nav>
     </div>
-    <div class="col-2"></div>
   </div>
   <div class="row">
     <span class="p-5"></span>

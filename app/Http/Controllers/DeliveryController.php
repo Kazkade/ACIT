@@ -30,12 +30,6 @@ class DeliveryController extends Controller
     { 
       DB::enableQueryLog();
       
-      // Order Location ID
-      $order_location = DB::table('locations')
-        ->where('location_name', '=', 'Orders')
-        ->get();
-      $order_location = $order_location[0]->id;
-      
       // Quantity Delivered
       $bags = DB::table('bags')
         ->where('delivered', '=', 0)
@@ -46,6 +40,18 @@ class DeliveryController extends Controller
         ->select(DB::raw('`updated_at`, MAX(`priority`) as "priority", `part_id`, SUM(`quantity`) as "ordered"'))
         ->groupBy('part_id')
         ->get();
+      
+      foreach($orders as $order)
+      {
+        $order->bag_count = 0;
+        foreach($bags as $bag)
+        {
+          if($bag->part_id == $order->part_id)
+          {
+            $order->bag_count++;
+          }
+        }
+      }
       
       $users = DB::table('users')
         ->select(DB::raw('`id`, `first_name`, `last_name`'))

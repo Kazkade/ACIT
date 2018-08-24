@@ -8,7 +8,18 @@
         <input hidden readonly required name="transfer_type" value="" id="transfer_type" >
         <div class="card w-100 border-dark">
           <div class="card-header bg-dark text-white h4">
-            Create Transfer
+            <?php if($_GET['transfer_type'] == 0) {?>
+               Default Transfer
+            <?php } ?>
+            <?php if($_GET['transfer_type'] == 1) {?>
+               Collection Transfer
+            <?php } ?>
+            <?php if($_GET['transfer_type'] == 2) {?>
+               Backstock Transfer
+            <?php } ?>
+            <?php if($_GET['transfer_type'] == 3) {?>
+               Audit Transfer
+            <?php } ?>
           </div>
           <div class="card-body">
             <div class="form-row">
@@ -212,6 +223,15 @@ $(document).ready(function() {
     }
     
     if(transfer_type == 2)
+    {
+      $('#from_location_id').val(locations.Processing);
+      $('#to_location_id').val(locations.Backstock);
+      $('#to_location_id').removeAttr('readonly');
+      $('#qa_row').show("blind", function() {});
+      $('#bagging_row').show("blind", function() {});
+    }
+  
+    if(transfer_type == 3)
     {
       $('#from_location_id').val(locations.Audit);
       $('#to_location_id').removeAttr('readonly');

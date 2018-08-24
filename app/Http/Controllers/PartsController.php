@@ -11,6 +11,8 @@ use App\Part;
 use App\Transfer;
 use App\Location;
 use App\Inventory;
+use App\Printer;
+use App\PrintProfile;
 
 //use DB; // For using SQL syntax. Try to stick to Eloquent unless it's absolutely necessary.
 
@@ -28,13 +30,12 @@ class PartsController extends Controller
     public function index()
     { 
       
-      
-      /*
       // Comment this out to avoid duplicate inventories.
       // This will, when run, create inventories for every part and every locations.
-      // You should only need this when you've truncated both the inventories, parts, and transfers tables
+      // You should only need this when you've truncated the inventories, parts, and transfers tables
       // and are re-uploading the CSV for the parts list.
-      
+      // This process can take several minutes to complete.
+      /*
       $parts = Part::all();
       $locations = Location::all();
       foreach($parts as $part)
@@ -51,8 +52,37 @@ class PartsController extends Controller
           
       }
       */
-      //SELECT `part_id`, SUM(`to_total`+`from_total`) as "Inventory" FROM `inventories` GROUP BY `part_id`
+      
+      // Comment this out to avoid duplicate profiles.
+      // This will, when run, create profiles for every part and every printer.
+      // You should only need this when you've truncated the profiles tables.
+      // This process can take several minutes to complete.
+      /*
+      $parts = Part::all();
+      $printers = Printer::all();
+      foreach($parts as $part)
+      {
+        foreach($printers as $printer)
+        {
+          $profile = new PrintProfile;
+          $profile->printer_id = $printer->id;
+          $profile->part_id = $part->id;
+          $profile->lead_time = 0;
+          $profile->prints = 0;
+          $profile->active = 0;
+          $profile->save();
+        }
+          
+      }
+      */
+      
+      #### Actual Start ##############
+      
       $parts = Part::orderBy('part_serial', 'asc')->paginate(100);
+      
+      $printers = DB::table('printers')
+        ->where('active', '=', 1)
+        ->get();
       
       $backstock_location_id = DB::table('locations')
         ->where('location_name', '=', 'Backstock')
@@ -72,6 +102,7 @@ class PartsController extends Controller
         ->groupBy('part_id')
         ->get();
       
+      // Consolodate Fields
       foreach($parts as $part)
       {
         foreach($inventories as $inventory)
@@ -79,19 +110,23 @@ class PartsController extends Controller
           if($inventory->part_id == $part->id)
           {
             $part->inventory = $inventory->inventory;
+            $part->total = $inventory->inventory;
           }
         }
-        foreach($bags as $bag)
+        $part->bag_count = 0;
+        foreach(DB::table('bags')->where('delivered', '=', 0)->get() as $bag)
         {
-          if($bag->part_id == $part->id)
-          {
-            $part->inventory += $bag->quantity;
-          }
+            if($bag->part_id == $part->id)
+            {
+              $part->bag_count += 1;
+              $part->total += $bag->quantity;
+            }
         }
       }
       // $posts = DB::select('SELECT * FROM parts');
       return view('pages.parts.index')
-        ->with('parts', $parts);
+        ->with('parts', $parts)
+        ->with('printers', $printers);
     }
 
     /**
@@ -134,10 +169,14 @@ class PartsController extends Controller
         } else {
           $part->part_cleaned = 1;
         }
-        $part->part_quantity = 0;
+        $part->print_time = $request->input('print_time');
+        $part->recommended_bagging = $request->input('rec_bagging');
         $part->save();
+      
+        // Retreive this Part's ID
+        $part = Part::orderBy('id', 'DESC')->first();  
+      
         // Create Inventories for part.
-        $part = Part::orderBy('id')->first;
         $locations = Location::all();
         foreach($locations as $location)
         {
@@ -148,8 +187,21 @@ class PartsController extends Controller
           $inventory->from_total = 0;
           $inventory->save();
         }
+      
+        // Create Profiles for part.
+        $printers = PrintProfile::all();
+        foreach($printers as $printer)
+        {
+          $profile = new PrintProfile;
+          $profile->printer_id = $printer->id;
+          $profile->part_id = $part->id;
+          $profile->lead_time = 0;
+          $profile->prints = 0;
+          $profile->active = 0;
+          $profile->save();
+        }
         
-        return redirect("/parts")->with('success', 'Part '.$part->part_serial.' Created! '.$deleted_inventories.' were deleted.');
+        return redirect("/parts")->with('success', 'Part '.$part->part_serial.' Created!');
     }
 
     /**
@@ -166,13 +218,68 @@ class PartsController extends Controller
         
         foreach($inventories as $inventory)
         {
-          $inventory->total = $inventory->to_total - $inventory->from_total;
+          $inventory->total = (int)$inventory->to_total - (int)$inventory->from_total;
         }
+        
+        // Build bags array. 
+        $bags = DB::table('bags')
+          ->select('*')
+          ->where('part_id', '=', $id)
+          ->where('delivered', '=', 0)
+          ->get();
+        // 
+        $users = DB::table('users')
+          ->select('*')
+          ->get();
+        // 
+        foreach($bags as $bag)
+        {
+          $bag->user_name = "";
+          foreach($users as $user)
+          {
+            if($bag->created_by == $user->id)
+            {
+              $bag->user_name = $user->first_name." ".$user->last_name;
+            }
+          }
+        }       
+        
+        // Get Orders, Deliveries, and Demand
+        $orders = DB::table('orders')
+          ->select(DB::raw('SUM(`quantity`) - SUM(`filled`) as "remaining", SUM(`quantity`) as "ordered", SUM(`filled`) as "delivered"'))
+          ->where('part_id', '=', $part->id)
+          ->first();
+      
+        $part->ordered = $orders->ordered;
+        $part->delivered = $orders->delivered;
+        $part->remaining = $orders->remaining;
+        
+        // Build Profiles for table.
+        $profiles = DB::table('print_profiles')
+          ->where('part_id', '=', $id)
+          ->get();
+      
+        $printers = DB::table('printers')
+        ->where('active', '=', 1)
+        ->get();
+      
+        foreach($profiles as $profile)
+        {
+            foreach($printers as $printer)
+            {
+              $printer->profile_active = 0;
+              $printer->lead_time = 0;
+              $printer->profile_active = $profile->active;
+              $printer->lead_time = $profile->lead_time;
+            }
+          }
       
         return view('pages.parts.show')
           ->with('inventories', $inventories)
           ->with('locations', $locations)
-          ->with('part', $part);
+          ->with('bags', $bags)
+          ->with('part', $part)
+          ->with('printers', $printers);
     }
 
     /**
@@ -220,7 +327,21 @@ class PartsController extends Controller
         $part->save();
         return redirect("/parts")->with('success', 'Part Created!');
     }
-
+    /**
+     * Changes moratorium status.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function moratorium($id)
+    {
+      
+        $part = Part::find($id);
+        $part->in_moratorium = ($part->in_moratorium == 0) ? 1 : 0;
+        $part->save();
+        return redirect("/parts/".$id);
+    }
+    
     /**
      * Remove the specified resource from storage.
      *
@@ -230,8 +351,12 @@ class PartsController extends Controller
     public function destroy($id)
     {    
         $locations = Location::all();
+        $profiles = PrintProfile::all();
+        
         $part = Part::find($id);
         $deleted_inventories = 0;
+        $deleted_profiles = 0;
+        
         foreach($locations as $location)
         {
           $inventory = Inventory::where([
@@ -241,10 +366,20 @@ class PartsController extends Controller
           Inventory::destroy($inventory->id);
           $deleted_inventories++;
         }
+      
+        foreach($printers as $printer)
+        {
+          $profile = PrintProfile::where([
+            ['part_id', '=', $part->id],
+            ['printer_id', '=', $printer->id]
+          ]);
+          PrintProfile::destroy($profile->id);
+          $deleted_profiles++;
+        }
         
         
         Part::destroy($id);
-        return redirect()->route('parts.index')->with('success', 'Part '.$part->part_serial.' deleted. '.$deleted_inventories.' were deleted.');
+        return redirect()->route('parts.index')->with('success', 'Part '.$part->part_serial.' deleted. '.$deleted_inventories.' inventories were deleted. '.$deleted_profiles.' profiles were deleted.');
 
     }
 }

@@ -1,5 +1,11 @@
 <?php
 use App\Part;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Http\Requests;
+use App\Http\Controllers\Controller;
+
 /*
 |--------------------------------------------------------------------------
 | Routes File
@@ -41,18 +47,41 @@ Route::get('ajax/part_info/{serial}', function($serial) {
   
   // Uncomment to see query.
   //dd(DB::getQueryLog());
+  //die(json_encode($part_info));
   
   return response(json_encode($part_info), 200)
     ->header('Content-Type', 'text/json');
 });
 
-//Route::get('/dashboard', 'PagesController@dashboard');
+// Upload New Ordes
+Route::post('orders/upload', 'OrderController@upload');
+
+// Bag Routes
+Route::post('bags/mark/{id}', 'BagsController@mark');
+Route::post('bags/unmark/{id}', 'BagsController@unmark');
+
+// Report Routes
+Route::get('reports/print_list', 'ReportController@print_list');
+Route::get('reports/delivery_report', 'ReportController@delivery_report');
+Route::get('reports/filament_usage', 'ReportController@filament_usage');
+Route::get('reports/engine/{query}', 'ReportController@report_engine');
+
+// Printer Routes
+Route::post('printer/store', 'PrinterController@store');
+Route::post('printer/toggle/{id}', 'PrinterController@toggle');
+Route::post('printer/destroy/{id}', 'PrinterController@destroy');
+
+// Additional Part Routes
+Route::post('part/moratorium/{id}', 'PartsController@moratorium')->name('parts.moratorium');
+
+// Resource Routes
 Route::resource('parts', 'PartsController');
 Route::resource('locations', 'LocationsController');
 Route::resource('transfers', 'TransfersController');
 Route::resource('orders', 'OrderController');
 Route::resource('deliveries', 'DeliveryController');
-
+Route::resource('users', 'UserController');
+Route::resource('configuration', 'ConfigurationController');
 /*
 |--------------------------------------------------------------------------
 | Application Routes

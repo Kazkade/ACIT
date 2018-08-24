@@ -6,78 +6,88 @@
     <div class="col-2">
     </div>
     <div class="col-8">
+      @if(Auth::user()->account_type == 2)
       <h3>
-        Transfer Log
+        Upload New Orders
       </h3>
+      <div class="col-md-6">
+        <form class="md-form" id="upload_form" action="/orders/upload" enctype="multipart/form-data" method="POST">
+          <input type="hidden" name="_token" value="{{ csrf_token() }}">
+          <div class="input-group mb-3 ">
+            <div class="input-group-prepend">
+              <span class="btn btn-info disabled" disabled="disabled"><i class="fa fa-paperclip" aria-hidden="true"></i></span>
+            </div>
+            <div class="custom-file">
+              
+              <input type="file" class="" name="orders_upload" id="file_upload">
+              <label class="custom-file-label" for="file_upload">Choose File</label>
+            </div>
+            <div class="input-group-append">
+              <input type="submit" class="btn btn-outline-success" value="Upload">
+            </div>
+          </div>
+        </form>        
+      </div>
+      <h3>
+        Outstanding Orders
+      </h3>
+      @endif
       <table class="table table-striped table-sm table-hover text-center ">
         <thead>
           <tr class="text-center">
-            <th scope="col">Edit</th>
-            <th scope="col">Updated</th>
-            <th scope="col">Tech</th>
-            <th scope="col" style="text-align: left !important">Part Name</th>
             <th scope="col">Serial</th>
-            <th scope="col">Quantity</th>
-            <th scope="col">From</th>
-            <th scope="col"></th>
-            <th scope="col">To</th>
+            <th scope="col" style="text-align: left !important">Part Name</th>
+            <th scope="col">On Order</th>
+            <th scope="col">TBD</th>
+            <th scope="col" style="text-align: left !important">Marked Bags</th>
           </tr>
         </thead>
         <tbody>
-          @if(count($transfers) > 0)
-            @foreach($transfers as $transfer)
+          @if(count($orders) > 0)
+            @foreach($orders as $order)
               <tr>
-                <td><a href="{{route('transfers.show', $transfer->id)}}" class="btn btn-sm btn-outline-secondary d-block">&#10070</a></td>
-                <td scope="row">{{date('d/m/y @ H:i', strtotime($transfer->updated_at))}}</td>
-                <td>
-                  @foreach($users as $user)
-                    @if($user->id == $transfer->user_id)
-                      {{$user->first_name}} {{$user->last_name}}
-                    @endif
-                  @endforeach
-                </td>
+                <td>{{$order->part_serial}}</td>
+                <td style="text-align: left !important">{{$order->part_name}}</td>
+                <td>{{$order->quantity}}</td>
+                <td>{{$order->tbd}}</td>
                 <td style="text-align: left !important">
-                  @foreach($parts as $part)
-                    @if($part->id == $transfer->part_id)
-                      {{$part->part_name}}
-                    @endif
-                  @endforeach
-                </td>
-                <td>
-                  @foreach($parts as $part)
-                    @if($part->id == $transfer->part_id)
-                      {{$part->part_serial}}
-                    @endif
-                  @endforeach
-                </td>
-                <td>{{$transfer->quantity}}</td>
-                <td>
-                  @foreach($locations as $location)
-                    @if($location->id == $transfer->from_location_id)
-                      {{$location->location_name}}
-                    @endif
-                  @endforeach
-                </td>
-                <td>&#8658</td>
-                <td>
-                  @foreach($locations as $location)
-                    @if($location->id == $transfer->to_location_id)
-                      {{$location->location_name}}
+                  @foreach($bags as $bag)
+                    @if($bag->part_id == $order->part_id)
+                      <a class="btn btn-sm btn-outline-dark" id="bag_{{$bag->id}}"
+                         title="Created By: {{$bag->user_name}} on {{$bag->updated_at}}" href="/deliveries?part_id={{$bag->part_id}}"
+                         >&#10070 | {{$bag->quantity}}</a>
                     @endif
                   @endforeach
                 </td>
               </tr>
-            @endforeach 
+            @endforeach
           @else
             <td colspan=9>
-              There are no locations yet. You'll need to add one.
+              There are no orders. You'll need to upload some.
             </td>
           @endif
         </tbody>
       </table>
-      {{$transfers->links()}}
+      @if(count($orders) > 0)
+        <a class="btn btn btn-outline-success d-block my-3" href="/orders/deliver_all">Deliver All</a>
+      @endif
     </div>
     <div class="col-2"></div>
   </div>
 </div>
+
+<script>
+$(document).ready(function() {
+  
+  $(function () {
+    $('[data-toggle=popover]').popover()
+  })
+  
+  $('.popover-dismiss').popover({
+    trigger: 'focus'
+  });
+  
+});
+</script>
+
 @endsection

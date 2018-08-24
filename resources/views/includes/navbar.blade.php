@@ -32,10 +32,10 @@
             <a class="dropdown-item" href="/transfers/create?transfer_type=2">Processing</a>
             @if(Auth::user()->account_type == 2)
               <div class="dropdown-divider"></div>
-              <a class="dropdown-item" href="/transfers/create?transfer_type=2">Audit</a>
+              <a class="dropdown-item" href="/transfers/create?transfer_type=3">Audit</a>
             @endif
             <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="/deliveries">Deliveries</a>
+            <a class="dropdown-item" href="/deliveries">Delivery</a>
           </div>
         </li>
         <!-- Data -->
@@ -47,6 +47,11 @@
             <a class="dropdown-item" href="{{route('parts.index')}}">Parts</a>
             <a class="dropdown-item" href="{{route('locations.index')}}">Locations</a>
             <a class="dropdown-item" href="{{route('transfers.index')}}">Transfers</a>
+            @if(Auth::user()->account_type == 2)
+              <div class="dropdown-divider"></div>
+              <a class="dropdown-item" href="/orders">Orders</a>
+              <a class="dropdown-item" href="/deliveries">Deliveries</a>
+            @endif
           </div>
         </li>
         @if(Auth::user()->account_type == 2)
@@ -56,17 +61,27 @@
             Admin
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-            <a class="dropdown-item" href="/transfers/create?transfer_type=2">Audit</a>
+            <a class="dropdown-item" href="/transfers/create?transfer_type=3">Audit</a>
             <a class="dropdown-item disabled" disabled="disabled" href="#">Overrides</a>
             <div class="dropdown-divider"></div>
-            <a class="dropdown-item" disabled href="#">Configuration</a>
-            
+            <a class="dropdown-item" href="{{route('configuration.index')}}">Configuration</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="/users">Users</a>
           </div>
         </li>
         @endif
         <!-- Reports -->
-        <li class="nav-item">
-          <a class="nav-link disabled" href="#">Reports</a>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Reports
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+            <a class="dropdown-item" href="/reports/print_list">Print List</a>
+            <a class="dropdown-item disabled" disabled="disabled" href="#">Delivery Report</a>
+            <a class="dropdown-item disabled" disabled="disabled" href="#">Filament Usage Report</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item disabled" disabled="disabled" href="#">Other Reports</a>
+          </div>
         </li>
       </ul>
       @endif

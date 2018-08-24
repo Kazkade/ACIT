@@ -12,15 +12,60 @@
         </div>
       </div>
       <div class="card-body">
-        <h5 class="card-title">Version: <strong>{{$part->part_version}}</strong></h5>
-        <h5 class="card-title">Color: <strong>{{$part->part_color}}</strong></h5>
-        <h5 class="card-title">Weight: <strong>{{$part->part_weight}}g</strong></h5>
-        @if($part->part_cleaned == 0) 
-          <h5 class="card-title">Cleaned: <strong>No</strong></h5>
-        @else 
-          <h5 class="card-title">Cleaned: <strong>Yes</strong></h5>
-        @endif
-        <h5 class="card-title">Inventory: <strong>{{$part->part_quantity}}</strong></h5>
+        <div class="row">
+          <div class="col">
+            <h5>
+              Stats:
+            </h5>
+            <h5 class="card-title">Version: <strong>{{$part->part_version}}</strong></h5>
+            <h5 class="card-title">Color: <strong>{{$part->part_color}}</strong></h5>
+            <h5 class="card-title">Weight: <strong>{{$part->part_weight}}g</strong></h5>
+            @if($part->part_cleaned == 0) 
+              <h5 class="card-title">Cleaned: <strong>No</strong></h5>
+            @else 
+              <h5 class="card-title">Cleaned: <strong>Yes</strong></h5>
+            @endif
+            @if($part->in_moratorium == 0) 
+              <h5 class="card-title">In Moratorium: <strong>No</strong></h5>
+            @else 
+              <h5 class="card-title">In Moratorium: <strong>Yes</strong></h5>
+            @endif
+            
+          </div>
+          <div class="col">
+            <h5 class="card-title">Bags:</h5>
+            @foreach($bags as $bag)
+              <a href="{{route('orders.index')}}" id="bag_{{$bag->id}}"
+                 title="Created By: {{$bag->user_name}} on {{$bag->updated_at}}"  class="btn btn-outline-dark"
+                 >&#10070 | {{$bag->quantity}}</a>
+            @endforeach
+          </div>
+          <div class="col">
+            <h5>
+                Print Profiles:
+            </h5>
+            <table class="table table-striped table-hover table-sm">
+              <thead>
+                <th>Printer</th>
+                <th class="text-center">Active</th>
+                <th class="text-center">Lead</th>
+              </thead>
+              <tbody>
+                @foreach($printers as $printer)
+                  <tr>
+                    <td>{{$printer->name}}</td>
+                    @if($printer->profile_active == 0)
+                      <td class="text-center"><span class="text-danger">&#10008</span></td>
+                    @else
+                      <td class="text-center"><span class="text-warning">&#10004</span></td>
+                    @endif
+                    <td class="text-center">{{$printer->lead_time}}</td>
+                  </tr>
+                @endforeach
+              </tbody>
+            </table>
+          </div>
+        </div>
         <br>
         <table class="table text-center">
           <thead>
@@ -89,6 +134,7 @@
           <thead>
             <th>Ordered</th>
             <th>Delivered</th>
+            <th>Remaining</th>
             <th>Fail Rate</th> <!-- Calculation: Failed / Created -->
             <th>Waste</th> <!-- Calculation: Failed * Weight -->
           </thead>
@@ -96,26 +142,13 @@
           <tbody>
             <tr>
               <td>
-                @foreach($locations as $location)
-                  @if($location->location_name == 'Ordered')
-                    @foreach($inventories as $inventory)
-                      @if($inventory->location_id == $location->id)
-                        {{$inventory->to_total}}
-                      @endif
-                    @endforeach
-                  @endif
-                @endforeach
+                {{$part->ordered}}
               </td>
               <td>
-                @foreach($locations as $location)
-                  @if($location->location_name == 'Delivery')
-                    @foreach($inventories as $inventory)
-                      @if($inventory->location_id == $location->id)
-                        {{$inventory->to_total}}
-                      @endif
-                    @endforeach
-                  @endif
-                @endforeach
+                {{$part->delivered}}
+              </td>
+              <td>
+                {{$part->remaining}}
               </td>
               <td>0%</td>
               <td>0g</td><!-- Total Filament Grams wasted -->
@@ -126,12 +159,20 @@
       <div class="card-footer">
         <a href="/parts" class="btn btn-outline-primary">Go Back</a>
         @if(Auth::user()->account_type == 2)
-          <form action="{{ route('parts.destroy' , $part->id)}}" class="float-right" method="POST">
-            <a href="{{route('parts.edit', $part->id)}}" class="btn btn-outline-info">Edit</a>
-              <input name="_method" type="hidden" value="DELETE">
-              {{ csrf_field() }}
+          <form action="{{ route('parts.destroy' , $part->id)}}" class="float-right mx-2" method="POST">
+            <input name="_method" type="hidden" value="DELETE">
+            {{ csrf_field() }}
             <button type="submit" class="btn btn-outline-danger ">&#10006 Delete</button>
           </form>
+          <a href="{{route('parts.edit', $part->id)}}" class="btn btn-outline-info float-right mx-2">Edit</a>
+          <form action="{{ route('parts.moratorium' , $part->id)}}" class="float-right mx-2" method="POST">
+            {{ csrf_field() }}
+            @if($part->in_moratorium == 0)
+              <button type="submit" class="btn btn-outline-dark">Move to Moratorium</button>
+            @else
+              <button type="submit" class="btn btn-outline-dark">Move to Production</button>
+            @endif
+          </form>  
         @endif
       </div>
   </div>

@@ -105,23 +105,32 @@ class TransfersController extends Controller
           ->where('part_id', '=', $fail_transfer->part_id)
           ->where('location_id', '=', $fail_transfer->to_location_id)
           ->increment('to_total', $fail_transfer->quantity);
+        
+        // Get Backstock Location ID
+        $backstock_location_id = DB::table('locations')
+        ->where('location_name', '=', 'Backstock')
+        ->get();
       
-        for($i = 0; $i < (int)$request->input('created_bags'); $i++)
+        $backstock_location_id = $backstock_location_id[0]->id;
+      
+        if($request->input('to_location_id') == $backstock_location_id)
         {
-          $bags = new Bag();
-          $bags->created_by = Auth::user()->id;
-          $bags->part_id = $request->input('part_id');
-          $bags->delivered = 0;
-          $bags->quantity = $request->input('bag_amount');
-          $bags->save();
+          for($i = 0; $i < (int)$request->input('created_bags'); $i++)
+          {
+            $bags = new Bag();
+            $bags->created_by = Auth::user()->id;
+            $bags->part_id = $request->input('part_id');
+            $bags->delivered = 0;
+            $bags->quantity = $request->input('bag_amount');
+            $bags->save();
 
-          // Update From Inventory
-          $from_inventory = DB::table('inventories')
-            ->where('part_id', '=', $pass_transfer->part_id)
-            ->where('location_id', '=', $pass_transfer->to_location_id)
-            ->decrement('to_total', $request->input('bag_amount'));
+            // Update From Inventory
+            $from_inventory = DB::table('inventories')
+              ->where('part_id', '=', $pass_transfer->part_id)
+              ->where('location_id', '=', $pass_transfer->to_location_id)
+              ->decrement('to_total', $request->input('bag_amount'));
+          }
         }
-
       
         // Save Everything
         $pass_transfer->save();

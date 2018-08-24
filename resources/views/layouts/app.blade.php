@@ -44,7 +44,5 @@
   @include('includes.messages')
 
   @yield('content')
-
-  @include('includes.footer')
 </body>
 </html>

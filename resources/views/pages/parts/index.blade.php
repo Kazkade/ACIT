@@ -38,8 +38,8 @@
             <input type="text" placeholder="0.2.4.6d" class="form-control" name="part_version"  id="part_version">
           </div>
           <div class="form-group col-md-6">
-            <label for="part_weight">Weight (g)</label>
-            <input type="number" placeholder="0.123" step="0.0001" class="form-control" name="part_weight" id="part_weight">
+            <label for="part_mass">Weight (g)</label>
+            <input type="number" placeholder="0.123" step="0.0001" class="form-control" name="part_mass" id="part_mass">
           </div>
         </div>
         <div class="form-row">
@@ -111,7 +111,7 @@
                 @else
                   <td><span class="text-danger">&#10008</span></td>
                 @endif
-                <td>{{$part->part_weight}}g</td>
+                <td>{{$part->part_mass}}g</td>
                 <td>{{$part->inventory}}</td>
                 <td>{{$part->bag_count}}</td>
                 <td>{{$part->total}}</td>

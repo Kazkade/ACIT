@@ -154,7 +154,7 @@ class PartsController extends Controller
           'part_serial' => 'required',
           'part_color' => 'required',
           'part_version' => 'required',
-          'part_weight' => 'required',
+          'part_mass' => 'required',
         ]);
       
         // Create Part
@@ -162,7 +162,7 @@ class PartsController extends Controller
         $part->part_name = $request->input('part_name');
         $part->part_serial = $request->input('part_serial');
         $part->part_color = $request->input('part_color');
-        $part->part_weight = $request->input('part_weight');
+        $part->part_mass = $request->input('part_mass');
         $part->part_version = $request->input('part_version');
         if($request->get('part_cleaned') == null) {
           $part->part_cleaned = 0;
@@ -221,6 +221,42 @@ class PartsController extends Controller
           $inventory->total = (int)$inventory->to_total - (int)$inventory->from_total;
         }
         
+        ### Getting Fail Information ##############################
+        $collections_location = DB::table('locations')
+          ->where('location_name', '=', 'Collections')
+          ->orderBy('updated_at', 'desc')
+          ->first();
+      
+        $fail_location = DB::table('locations')
+          ->where('location_name', '=', 'Fails')
+          ->orderBy('updated_at', 'desc')
+          ->first();
+      
+        $fails = DB::table('inventories')
+          ->where('part_id', '=', $part->id)
+          ->where('location_id', '=', $fail_location->id)
+          ->orderBy('updated_at', 'DESC')
+          ->first();
+      
+        // Fail Rate
+        $passes = DB::table('inventories')
+          ->where('part_id', '=', $part->id)
+          ->where('location_id', '=', $collections_location->id)
+          ->orderBy('updated_at', 'DESC')
+          ->first();
+      
+        set_error_handler(function () {
+            return 0;
+        });
+      
+        // Fail Percentage
+        $part->fail_rate = ($fails->to_total - $fails->from_total == 0) ? 0.00 : ($fails->to_total - $fails->from_total == 0) / $passes->from_total;
+        
+        
+      
+        // Grams of waste.
+        $part->total_waste = $part->part_mass * ($fails->to_total - $fails->from_total);
+      
         // Build bags array. 
         $bags = DB::table('bags')
           ->select('*')
@@ -263,16 +299,18 @@ class PartsController extends Controller
         ->where('active', '=', 1)
         ->get();
       
-        foreach($profiles as $profile)
+        foreach($printers as $printer)
         {
-            foreach($printers as $printer)
+            foreach($profiles as $profile)
             {
-              $printer->profile_active = 0;
-              $printer->lead_time = 0;
-              $printer->profile_active = $profile->active;
-              $printer->lead_time = $profile->lead_time;
+              if($profile->printer_id == $printer->id)
+              {
+                $printer->profile_active = ($profile->prints > 0) ? 1 : 0;
+                $printer->prints = $profile->prints;
+                $printer->lead_time = $profile->lead_time;
+              }
             }
-          }
+        }
       
         return view('pages.parts.show')
           ->with('inventories', $inventories)

@@ -45,6 +45,10 @@
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
             <a class="dropdown-item" href="{{route('parts.index')}}">Parts</a>
+            @if(Auth::user()->account_type == 2)
+              <a class="dropdown-item" href="/profiles">Profiles</a>
+              <div class="dropdown-divider"></div>
+            @endif
             <a class="dropdown-item" href="{{route('locations.index')}}">Locations</a>
             <a class="dropdown-item" href="{{route('transfers.index')}}">Transfers</a>
             @if(Auth::user()->account_type == 2)

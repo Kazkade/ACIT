@@ -81,6 +81,7 @@ Route::resource('transfers', 'TransfersController');
 Route::resource('orders', 'OrderController');
 Route::resource('deliveries', 'DeliveryController');
 Route::resource('users', 'UserController');
+Route::resource('profiles', 'ProfileController');
 Route::resource('configuration', 'ConfigurationController');
 /*
 |--------------------------------------------------------------------------
@@ -96,5 +97,4 @@ Route::resource('configuration', 'ConfigurationController');
 Route::group(['middleware' => 'web'], function () {
     Route::auth();
   
-    Route::get('/home', 'HomeController@index');
 });

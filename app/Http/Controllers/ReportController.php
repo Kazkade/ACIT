@@ -150,8 +150,100 @@ class ReportController extends Controller
      */
     public function filament_usage()
     {
-      // not created.
-        return view('pages.reports.print_demand');
+      // Get total data.
+      $parts = DB::table('parts')->get();
+      $inventories = DB::table('inventories')->get();
+      $bags = DB::table('bags')->get();
+      $orders = DB::table('orders')->get();
+      
+      // Get Inventory IDs
+      $collections_id = DB::table('locations')->where('location_name', '=', 'Collections')->first(); $collections_id = $collections_id->id;
+      $processing_id = DB::table('locations')->where('location_name', '=', 'Processing')->first(); $processing_id = $processing_id->id;
+      $backstock_id = DB::table('locations')->where('location_name', '=', 'Backstock')->first(); $backstock_id = $backstock_id->id;
+      $fails_id = DB::table('locations')->where('location_name', '=', 'Fails')->first(); $fails_id = $fails_id->id;
+      $inhouse_id = DB::table('locations')->where('location_name', '=', 'InHouse')->first(); $inhouse_id = $inhouse_id->id;
+      
+      foreach($parts as $part)
+      {
+        // Get full inventories.
+        foreach($inventories as $inventory)
+        {
+          if($inventory->part_id && $part->id)
+          {
+            if($inventory->location_id == $collections_id) 
+            {
+              $part->collections = $inventory->to_total - $inventory->from_total;
+            }
+                      
+            if($inventory->location_id == $processing_id) 
+            {
+              $part->processing = $inventory->to_total - $inventory->from_total;
+            }
+                      
+            if($inventory->location_id == $backstock_id) 
+            {
+              $part->backstock = $inventory->to_total - $inventory->from_total;
+            }
+                      
+            if($inventory->location_id == $fails_id) 
+            {
+              $part->fails = $inventory->to_total - $inventory->from_total;
+            }
+            if($inventory->location_id == $inhouse_id) 
+            {
+              $part->inhouse = $inventory->to_total - $inventory->from_total;
+            }
+          }
+        }
+      }
+      
+      // Build Report
+      $table = array();
+      foreach($parts as $part)
+      {
+        $row = (object)[];
+        $row->part_name = $part->part_name;
+        $row->part_serial = $part->part_serial;
+        $row->part_color = $part->part_color;
+        $row->part_mass = $part->part_mass;
+        $row->part_waste = $part->part_waste;
+        $row->parts_created = $part->collections;
+        $row->parts_failed = $part->fails;
+        $row->passed_filament = $part->backstock * ($part->part_mass);
+        $row->fallout_filament = $part->fails * ($part->part_mass);
+        $row->scrap_filament = $part->collections * ($part->part_waste);
+        $row->inhouse_filament = $part->inhouse * ($part->part_mass);
+        $row->total_filament = $part->collections * ($part->part_mass + $part->part_waste);
+        array_push($table, $row);
+      }
+      
+      // Seperate Rows by Color
+      // // Get filament colors among parts.
+      $filament_colors = array();
+      foreach($table as $row)
+      {
+        if(!in_array($row->part_color, $filament_colors))
+        {
+          array_push($filament_colors, $row->part_color);
+        }
+      }
+      
+      $separated = array();
+      // Cycle through colors first and
+      foreach($filament_colors as $color)
+      {
+        foreach($table as $row)
+        {
+          if($row->part_color == $color)
+          {
+            array_push($separated, $row);
+          }
+        } 
+      }
+     
+      return view('pages.reports.filament_usage')
+        ->with('colors', $filament_colors)
+        ->with('report', $separated);
     }
   
     /**

@@ -64,6 +64,7 @@ Route::post('bags/unmark/{id}', 'BagsController@unmark');
 Route::get('reports/print_list', 'ReportController@print_list');
 Route::get('reports/delivery_report', 'ReportController@delivery_report');
 Route::get('reports/filament_usage', 'ReportController@filament_usage');
+Route::get('reports/weekly_scrap', 'ReportController@weekly_scrap');
 Route::get('reports/engine/{query}', 'ReportController@report_engine');
 
 // Printer Routes

@@ -11,8 +11,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css" rel='stylesheet' type='text/css'>
     <link href="https://fonts.googleapis.com/css?family=Lato:100,300,400,700" rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabulator/3.5.3/css/bootstrap/tabulator_bootstrap.css" integrity="sha256-/d+iiaitqt/mXwEe1Zq6bnbBrRjdNgdiGFazmT+GqNI=" crossorigin="anonymous" />
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabulator/3.5.3/css/tabulator_modern.css" integrity="sha256-ZH3Yo3RMW0vm7zUBjcc5NLlawOPboDNhy6C3zphVGms=" crossorigin="anonymous" />
     {{-- <link href="{{ elixir('css/app.css') }}" rel="stylesheet"> --}}
   
       <!-- JavaScripts -->
@@ -29,6 +28,9 @@
     crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js" integrity="sha256-XF29CBwU1MWLaGEnsELogU6Y6rcc5nCkhhx89nFMIDQ=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tabulator/3.5.3/js/tabulator.js" integrity="sha256-++ysaNmKnnex11/6TOC8Ne09ffiNhHIBMRoMT+YUQ0s=" crossorigin="anonymous"></script>
+    <!-- For Downloading Tables from Tabulator as PDF files -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.5/jspdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/2.3.2/jspdf.plugin.autotable.js"></script>
     {{-- <script src="{{ elixir('js/app.js') }}"></script> --}}
 
     <style>
@@ -41,11 +43,23 @@
         }
         /* Code for hiding non-printable material */
         @media print
-        {    
-            .no-print, .no-print *
-            {
-                display: none !important;
-            }
+        { 
+          
+          .no-print, .no-print *
+          {
+            display: none !important;
+          }
+          
+          hr {
+            page-break-after: always;
+          }
+        }
+
+        @media print and (color) {
+           * {
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+           }
         }
     </style>
 </head>

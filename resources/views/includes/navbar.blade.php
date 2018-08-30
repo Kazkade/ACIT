@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-lg navbar-dark fixed-top"
+<nav class="no-print navbar navbar-expand-lg navbar-dark fixed-top"
    @if(Auth::guest())
       style="background-color: #263238"
    @else
@@ -82,7 +82,8 @@
           <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
             <a class="dropdown-item" href="/reports/print_list">Print List</a>
             <a class="dropdown-item disabled" disabled="disabled" href="#">Delivery Report</a>
-            <a class="dropdown-item disabled" disabled="disabled" href="#">Filament Usage Report</a>
+            <a class="dropdown-item" href="/reports/filament_usage">Filament Usage Report</a>
+            <a class="dropdown-item" href="/reports/weekly_scrap">Weekly Scrap Report</a>
             <div class="dropdown-divider"></div>
             <a class="dropdown-item disabled" disabled="disabled" href="#">Other Reports</a>
           </div>

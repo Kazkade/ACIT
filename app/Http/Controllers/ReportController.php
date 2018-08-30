@@ -246,6 +246,118 @@ class ReportController extends Controller
         ->with('report', $separated);
     }
   
+  
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */    
+    public function weekly_scrap()
+    {
+      // Get total data.
+      $parts = DB::table('parts')->get();
+
+      // Get first transfer.
+      $earliest_date = DB::table('transfers')
+        ->select(DB::raw("MAX(DATE(`updated_at`)) as earliest"))
+        ->first();
+      // Get earliest date from variable.
+      $earliest_date = $earliest_date->earliest;
+      // Get next wednesday.
+      $first_wednesday = date('Y-m-d', strtotime("next wednesday", strtotime($earliest_date)));
+      
+      // This is a huge query. Can take some time.
+      $transfers = DB::select('
+        SELECT 
+        T.`part_id` AS "part_id", 
+        T.`week_number` AS "week_number", 
+        T.`to_location_id` AS "to_location_id", 
+        T.`from_location_id` AS "from_location_id", 
+        sum(T.`quantity`) AS "quantity"
+        FROM (
+            SELECT 
+            `part_id`,
+            `to_location_id`,
+            `from_location_id`,
+            CEILING(DATEDIFF(DATE(:first_wednesday), DATE(`updated_at`))/7)-1 AS "week_number",
+            `quantity`
+            FROM `transfers`
+        ) AS T
+        GROUP BY
+        part_id,
+        week_number
+      ',
+       array(
+         'first_wednesday' => $first_wednesday
+       ));
+          
+      // Get Inventory IDs
+      $collections_id = DB::table('locations')->where('location_name', '=', 'Collections')->first(); $collections_id = $collections_id->id;
+      $processing_id = DB::table('locations')->where('location_name', '=', 'Processing')->first(); $processing_id = $processing_id->id;
+      $backstock_id = DB::table('locations')->where('location_name', '=', 'Backstock')->first(); $backstock_id = $backstock_id->id;
+      $fails_id = DB::table('locations')->where('location_name', '=', 'Fails')->first(); $fails_id = $fails_id->id;
+      $inhouse_id = DB::table('locations')->where('location_name', '=', 'InHouse')->first(); $inhouse_id = $inhouse_id->id;
+      
+      if(count($transfers) == 0) 
+      {
+        $filament_colors = array();
+        $report = array();
+        return redirect('/')
+        ->with('error', "There was nothing to report.")
+        ->with('colors', $filament_colors)
+        ->with('report', $report);
+      }
+      
+      // Build Report
+      $table = array();
+      foreach($transfers as $transfer)
+      {
+        foreach($parts as $part)
+        {
+          if($transfer->to_location_id == $fails_id && $transfer->part_id == $part->id)
+          {
+            $part->scrap += $transfer->quantity * ($part->part_waste + $part->part_mass);
+          }
+          if($transfer->from_location_id == $fails_id && $transfer->part_id == $part->id)
+          {
+            $part->scrap -= $transfer->quantity * ($part->part_waste + $part->part_mass);
+          }
+          array_push($table, $part);
+        }
+
+      }
+      
+      // Seperate Rows by Color
+      // // Get filament colors among parts.
+      $filament_colors = array();
+      foreach($table as $row)
+      {
+        if(!in_array($row->part_color, $filament_colors))
+        {
+          array_push($filament_colors, $row->part_color);
+        }
+      }
+      
+      $report = array();
+      // Cycle through colors first and
+      foreach($filament_colors as $color)
+      {
+        foreach($table as $row)
+        {
+          if($row->part_color == $color)
+          {
+            array_push($separated, $row);
+          }
+        } 
+      }
+      
+      die(var_dump($report));
+      
+      return view('pages.reports.weekly_scrap')
+        ->with('colors', $filament_colors)
+        ->with('report', $report);
+    }
+    
     /**
      * Display a listing of the resource.
      *

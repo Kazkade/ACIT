@@ -1,4 +1,4 @@
-<div class="bg-dark text-light" style="position: fixed; bottom: 0; width: 100%;">
+<div class="no-print bg-dark text-light" style="position: fixed; bottom: 0; width: 100%;">
   <div class="container">
     <div class="row">
       <div class="col-lg-6">

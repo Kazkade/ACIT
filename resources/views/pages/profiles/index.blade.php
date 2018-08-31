@@ -12,6 +12,7 @@
           </h3>
       </div>
       <br>
+        {{$parts->links()}}
         <table class="table table-striped table-sm table-hover text-center align-middle">
           <thead>
             <tr>
@@ -88,7 +89,11 @@
 <script>
 $(document).ready(function() {
   function scrollTo(hash) {
-      location.hash = "#part_" + @if(isset($part_id)){{$part_id}}@else 1 @endif;
+    var id = 1;
+    @if(isset($part_id))
+      var id = {{$part_id->part_id}};
+    @endif
+    location.hash = "#part_"+id;
   }
 });
 </script>

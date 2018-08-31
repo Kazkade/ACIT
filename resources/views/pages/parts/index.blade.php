@@ -2,145 +2,153 @@
 @section('content')
 <div class="container-fluid">
   <div class="row">
-    <div class="col-2">
-      @if(Auth::user()->account_type == 2)
-      <h3>
-        Add New Part
-      </h3>
-      <form action="{{route('parts.store')}}", method="POST">
-        <input type="hidden" name="_token" value="{{ csrf_token() }}">
-        <div class="form-row">
-          <div class="form-group col-md-12">
-            <label for="part_name">Part Name</label>
-            <input type="text" class="form-control" name="part_name" id="part_name" placeholder="Part Name">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group col-md-6">
-            <label for="inputAddress">Serial</label>
-            <input type="text" class="form-control" name="part_serial" id="part_serial" placeholder="AS-PR0123">
-          </div>
-          <div class="form-group col-md-6">
-            <label for="part_color">Color</label>
-            <select id="part_color" name="part_color" class="form-control">
-              <option selected>ABS Black</option>
-              <option>ABS Green</option>
-              <option>ABS Gray</option>
-              <option>Flexy Black</option>
-              <option>Flexy Green</option>
-              <option>Other</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group col-md-6">
-            <label for="part_version">Version</label>
-            <input type="text" placeholder="0.2.4.6d" class="form-control" name="part_version"  id="part_version">
-          </div>
-          <div class="form-group col-md-6">
-            <label for="part_mass">Weight (g)</label>
-            <input type="number" placeholder="0.123" step="0.0001" class="form-control" name="part_mass" id="part_mass">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group col-md-6">
-            <label for="inputAddress">Print Time</label>
-            <input type="text" class="form-control" name="print_time" id="part_time" placeholder="123">
-          </div>
-          <div class="form-group col-md-6">
-            <label for="inputAddress">Rec. Bagging</label>
-            <input type="text" class="form-control" name="rec_bagging" id="part_bagging" placeholder="20">
-          </div>
-        </div>
-        <div class="form-group">
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="part_cleaned"  id="gridCheck">
-            <label class="form-check-label" for="gridCheck">
-              Does this part need extra cleaning?
-            </label>
-          </div>
-        </div>
-        <div class="form-group">
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="part_moratorium"  id="gridCheck">
-            <label class="form-check-label" for="gridCheck">
-              Is this part in moratorium?
-            </label>
-          </div>
-        </div>
-        <button type="submit" class="btn btn-outline-primary w-100">&#10010 Add Part</button>
-      </form>
-      @endif
-    </div>
-    <div class="col-9 ">
+    <div class="col-1"></div>
+    <div class="col-10 ">
       <h3>
         Parts
       </h3>
-      <table class="table table-striped table-sm table-hover text-center align-middle">
-        <thead>
-          <tr>
-            <th scope="col">Updated</th>
-            <th scope="col" style="text-align: left !important;">Name</th>
-            <th scope="col">Serial</th>
-            <th scope="col">Color</th>
-            <th scope="col">Version</th>
-            <th scope="col">Cleaned</th>
-            <th scope="col">Weight</th>
-            <th scope="col">Stock</th>
-            <th scope="col">Bags</th>
-            <th scope="col">Total</th>
-            <th scope="col">View</th>
-            <th scope="col">Edit</th>
-          </tr>
-        </thead>
-        <tbody>
-          @if(count($parts) > 0)
-            @foreach($parts as $part)
-              @if($part->in_moratorium == 0)
-                <tr>
-              @else
-                <tr style="background-color: #bbb; opacity: 0.5">
-              @endif    
-                <td scope="row">{{date('d/m/y @ H:i', strtotime($part->updated_at))}}</td>
-                <td style="text-align: left !important;">{{$part->part_name}}</td>
-                <td>{{$part->part_serial}}</td>
-                <td>{{$part->part_color}}</td>
-                <td>{{$part->part_version}}</td>
-                @if($part->part_cleaned == 1)
-                  <td><span class="text-success">&#10004</span></td>
-                @else
-                  <td><span class="text-danger">&#10008</span></td>
-                @endif
-                <td>{{$part->part_mass}}g</td>
-                <td>{{$part->inventory}}</td>
-                <td>{{$part->bag_count}}</td>
-                <td>{{$part->total}}</td>
-                @if($part->in_moratorium == 0)
-                  <td><a href="{{route('parts.show', $part->id)}}" class="btn btn-sm btn-outline-secondary d-block">&#10070</a></td>
-                @else
-                  @if(Auth::user()->account_type == 2)
-                    <td><a href="{{route('parts.show', $part->id)}}" class="btn btn-sm btn-outline-secondary d-block">&#10070</a></td>
-                  @endif
-                @endif
-                @if(Auth::user()->account_type == 2)
-                  <td><a href="{{route('parts.edit', $part->id)}}" class="btn btn-sm btn-outline-info d-block">&#9998</a></td>
-                @endif
-              </tr>
-            @endforeach 
-          @else
-            <td colspan=9>
-              There are no parts yet. You'll need to add one.
-            </td>
-          @endif
-        </tbody>
-      </table>
-      <nav aria-label="page navigation example">
-        {{$parts->links()}}
-      </nav>
+      @if(Auth::user()->account_type = 2)
+        <a href="#" id="add_new_row" class="btn btn-outline-primary">❖ Add New Part</a>
+        <a href="#" id="save_changes" class="btn btn-outline-success">✔ Save Changes</a>
+      @endif
+      <div id="report-table"></div>
     </div>
   </div>
   <div class="row">
     <span class="p-5"></span>
   </div>
 </div>
+
+<script>
+var data = [
+  @foreach($parts as $row)
+    {
+      "status": "unchanged",
+      "updated_at":"{{date('m/d/y @ H:i', strtotime($row->updated_at))}}",
+      "part_name": "{{$row->part_name}}",
+      "part_serial": "{{$row->part_serial}}",
+      "part_color": "{{$row->part_color}}",
+      "part_version": "{{$row->part_version}}",
+      "part_cleaned": "{{$row->part_cleaned}}",
+      "part_mass": "{{$row->part_mass}}",
+      "part_stock": "{{$row->inventory}}",
+      "part_bags": "{{$row->bag_count}}",
+      "part_total": "{{$row->total}}",
+      "part_view": "{{$row->id}}",
+    },
+  @endforeach
+];
+  
+var editable = @if(Auth::user()->account_type = 2) true @else false @endif ;
+  
+$("#report-table").tabulator({
+  layout:"fitColumns", //fit columns to width of table (optional)
+  placeholder:"No parts to show. :( ",
+  columns:[
+    {title:"Status", field:"status", align:"center", visible: true, editor: false},
+    {title:"Updated", field:"updated_at", align:"center", width: 150, editor: false},
+    {title:"Name", field:"part_name", download: false, align: "left", editor: editable, width: 250},
+    {title:"Serial", field:"part_serial", align:"center", width: 110, editor: editable},
+    {title:"Color", field:"part_color", align:"center", width: 120, editor:"select", editorParams:{
+      @foreach($filaments as $filament)
+        "{{$filament->filament_name}}":"{{$filament->filament_name}}",
+      @endforeach
+    }},
+    {title:"Version", field:"part_version", align:"center", editor: editable},
+    {title:"Cleaned", field:"part_cleaned", align:"center", formatter:"tickCross", editor: editable},
+    {title:"Mass", field:"part_mass", align:"center", editor: editable},
+    {title:"Stock", field:"part_stock", align:"center", editor: false},
+    {title:"Bags", field:"part_bags", align:"center", editor: false},
+    {title:"Total", field:"part_total", align:"center", editor: false},
+    {title:"View", field:"part_view", width:80, formatter:function(cell, formatterParams){
+     var value = cell.getValue();
+      if(value > 0){
+        return "<a class='btn btn-sm btn-outline-info d-block' href='parts/"+value+"'>View</span>";
+      }else{
+        return "<a class='btn btn-sm btn-outline-info disabled d-block' disabled='disabled' href='#'>View</span>";
+      }
+    }},
+    {title:"", field:"blank", align:"center", editor: false, width: 80, headerSort:false},
+  ],
+  rowFormatter:function(row){
+    //row - row component
+
+    var data = row.getData();
+
+    if(data.col == "blue"){
+        row.getElement().css({"background-color":"#A6A6DF"});
+    }
+  },
+  cellEdited:function(cell){
+    var change = cell.getRow().getData();
+    change.status = "update";
+    $("#report-table").tabulator("updateData", [change]);
+    $('#report-table').tabulator('redraw', false);
+  },
+});
+  
+$("#report-table").tabulator("setData",data);
+  
+var updatedRows = [
+];
+
+
+$('#save_changes').on('click', function() {
+  
+  updatedRows.data = [];
+  
+  $('.tabulator-row').each(function(i, el){
+    
+    var $tds =  $(this).find('.tabulator-cell');
+    if($tds.eq(0).text() != 'unchanged')
+    {
+      var ar = {
+        "status": $tds.eq(0).text(),
+        "part_name": $tds.eq(2).text(),
+        "part_serial": $tds.eq(3).text(),
+        "part_color": $tds.eq(4).text(),
+        "part_version": $tds.eq(5).text(),
+        "part_cleaned": $tds.eq(6).text(),
+        "part_mass": $tds.eq(7).text()
+      }
+      
+      updatedRows.data.push(ar);
+    }
+  });
+  
+  console.log("Changed/New Rows");
+  console.log(updatedRows);
+  
+  $.ajax({
+    type: "POST",
+    headers: {
+      'X-CSRF-TOKEN': "{{ csrf_token() }}",
+    },
+    url: "parts/update_or_create",
+    data: updatedRows,
+    success: function() {
+      location.refresh();
+    },
+    dataType: "JSON"
+  });
+  
+});
+  
+$('#add_new_row').on('click', function() {
+  var o = {
+    "status":"update", 
+     "part_name":"New Part", 
+     "part_serial":"XX-XX0000", 
+     "part_color": "Black",
+     "part_version": "0.0.0",
+     "part_mass": 0,
+     "part_cleaned":0, 
+     "part_stock": 0, 
+     "part_bags": 0, 
+     "part_total": 0
+  }
+  $("#report-table").tabulator("addRow", o, true);
+});
+
+</script>
 @endsection

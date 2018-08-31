@@ -40,11 +40,22 @@ class ReportController extends Controller
           ### Setting Up Orders & Inventory #####################################
           $part->on_order = 0;
           $part->remaining = 0;
+          $part->priority = 0;
           // Get Initial Order Totals
           foreach($orders as $order)
           {
+            
               if($order->part_id == $part->id)
               {
+                $part->priority = ($order->priority > $part->priority) ? $order->priority : $part->priority ;
+                $part->priority_value = $part->priority;
+                switch($part->priority)
+                {
+                  case 0: $part->priority = "Low"; break;
+                  case 1: $part->priority = "Mid"; break;
+                  case 2: $part->priority = "High"; break;
+                  default: $part->priority = "High"; break;
+                }
                 $part->on_order += $order->quantity;
                 $part->remaining += ($order->quantity - $order->filled);
               }
@@ -69,53 +80,31 @@ class ReportController extends Controller
           }
           
           ### Setting Up Profiles #####################################
-          // Append Profiles
-          for($i = 0; $i < count($printers); $i++)
-          {
-            $part->profile[$i] = $printers[$i];
-          }
-          
-          // Initialize Pods to 10.
-          $part->pods = 0;
-          
-          
           // Loop through printers and profiles.
           // Find the profile that matches each printer in the loop AND the current part in the loop
           // and return that profile information. 
           // This will return $part->profile as an array.
+          $part->pods = 0;
+          
           for($i = 0; $i < count($printers); $i++)
           {
-            $pods_array = array();
-            // Set Defaults to 0
-            $part->profile[$i]->active = 0;
-            $part->profile[$i]->lead_time = 0;
+            $part->profile[$i] =  new \stdClass();
             $part->profile[$i]->pods = 0;
             foreach($profiles as $profile)
             {
               if($profile->printer_id == $printers[$i]->id && $profile->part_id == $part->id)
               {
-                $part->profile[$i]->active = $profile->active;
-                $part->profile[$i]->lead_time = $profile->lead_time;
-                $part->profile[$i]->pods = ($profile->prints > 0) ? ceil($part->remaining / $profile->prints) : 1;
-                if($part->profile[$i]->pods > $part->pods)
-                {
-                  $part->pods = $part->profile[$i]->pods;
-                }
+                $temp_profile = new \stdClass();
+                $temp_profile->printer_name = $printers[$i]->name;
+                $temp_profile->active = $profile->active;
+                $temp_profile->lead_time = $profile->lead_time;
+                $temp_profile->prints = $profile->prints;
+                $temp_profile->pods = ($profile->prints > 0) ? ceil($part->remaining / $profile->prints) / 10 : 1;
+                $part->profile[$i] = $temp_profile;
+                $part->pods = ($temp_profile->pods > $part->pods) ? $temp_profile->pods : $part->pods; 
               } 
             }
           }
-          
-          foreach($part->profile as $profile)
-          {
-            if($profile->pods > 0)
-            {
-              if($profile->pods <= 10 && $profile->pods < $part->pods)
-              {
-                $part->pods = $profile->pods;
-              }
-            }
-          }
-          
         }
       
         // Create Report Object
@@ -127,6 +116,8 @@ class ReportController extends Controller
             array_push($report, $parts[$i]);
           }
         }
+      
+
         return view('pages.reports.print_demand')
           ->with('report', $report)
           ->with('printers', $printers);

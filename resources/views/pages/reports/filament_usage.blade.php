@@ -34,85 +34,51 @@ $("#download_as_pdf").on('click', function(){
   
 
 var nestedData = [
-  @foreach($colors as $color)
-    {"filament_color": "{{$color}}", "usages": [
-      @foreach($report as $row)
-        @if($row->part_color == $color)
-          {
-          "part_name": "{{$row->part_name}}",
-          "part_serial": "{{$row->part_serial}}",
-          "part_mass": {{$row->part_mass}},
-          "part_waste": {{$row->part_waste}},
-          "parts_created": {{$row->parts_created}},
-          "parts_failed": {{$row->parts_failed}},
-          "passed_filament": {{$row->passed_filament}},
-          "fallout_filament": {{$row->fallout_filament}},
-          "scrap_filament": {{$row->scrap_filament}},
-          "inhouse_filament": {{$row->inhouse_filament}},
-          "total_filament": {{$row->total_filament}} ,
-          },
-        @endif
-      @endforeach
-    ]},
+  @foreach($report as $row)
+    {
+      "part_name": "{{$row->part_name}}",
+      "part_serial": "{{$row->part_serial}}",
+      "part_color": "{{$row->part_color}}",
+      "part_mass": {{$row->part_mass}},
+      "part_waste": {{$row->part_waste}},
+      "parts_created": {{$row->parts_created}},
+      "parts_failed": {{$row->parts_failed}},
+      "passed_filament": {{$row->passed_filament}},
+      "fallout_filament": {{$row->fallout_filament}},
+      "scrap_filament": {{$row->scrap_filament}},
+      "inhouse_filament": {{$row->inhouse_filament}},
+      "total_filament": {{$row->total_filament}} ,
+    },
   @endforeach
 ];
 
 $("#report-table").tabulator({
   layout:"fitColumns", //fit columns to width of table (optional)
-
-  columns:[ //Define Table Columns
-    {title:"Filament Color", field:"filament_color"},
-  ],
-  rowFormatter:function(row){
-    //create and style holder elements
-    var holderEl = $("<div></div>");
-    var tableEl = $("<div></div>");
-
-    holderEl.css({
-      "box-sizing":"border-box",
-      "padding":"10px 30px 10px 10px",
-      "border-top":"1px solid #333",
-      "border-bottom":"1px solid #333",
-      "background":"#ddd",
-    })
-
-    tableEl.css({
-      "border":"1px solid #333",
-    })
-
-    holderEl.append(tableEl);
-
-    row.getElement().append(holderEl);
-
-    //create nested table
-    tableEl.tabulator({
-      layout:"minWidth",
-      resizableColumns:false,
-      data:row.getData().usages,
-      columns:[
-        {
-          title: "Part Info",
-          columns: [
-            {title:"Name", field:"part_name", download: false, align: "let", width:300},
-            {title:"Serial", field:"part_serial", align:"center", width: 100},
-            {title:"Mass", field:"part_mass", align:"center", width: 100},
-            {title:"Waste", field:"part_waste", align:"center", width: 100},
-            {title:"Produced", field:"parts_created", align:"center", bottomCalc:"sum"},
-          ]
-        },
-        {
-          title: "Filament Usage",
-          columns: [
-            {title:"Failed", field:"fallout_filament", align:"center", bottomCalc:"sum"},
-            {title:"Passing", field:"passed_filament", align:"center", bottomCalc:"sum"},
-            {title:"Scrap", field:"scrap_filament", align:"center", bottomCalc:"sum"},
-            {title:"In House Use", field:"inhouse_filament", align:"center", bottomCalc:"sum"},
-            {title:"Total Filament", field:"total_filament", downloadName: "Total", align:"center", bottomCalc:"sum"}
-          ]
-        }
+  groupBy:"part_color",
+  placeholder:"No parts to show. :( ",
+  columns:[
+    {
+      title: "Part Info",
+      columns: [
+        {title:"Name", field:"part_name", download: false, align: "let", width:300},
+        {title:"Serial", field:"part_serial", align:"center", width: 100},
+        {title:"Color", field:"part_color", align:"center", visible:false},
+        {title:"Mass", field:"part_mass", align:"center", width: 100},
+        {title:"Waste", field:"part_waste", align:"center", width: 100},
+        {title:"Produced", field:"parts_created", align:"center", bottomCalc:"sum"},
       ]
-    })
-  },
+    },
+    {
+      title: "Filament Usage",
+      columns: [
+        {title:"Passing", field:"passed_filament", align:"center", bottomCalc:"sum"},
+        {title:"Failed", field:"fallout_filament", align:"center", bottomCalc:"sum"},
+        {title:"Scrap", field:"scrap_filament", align:"center", bottomCalc:"sum"},
+        {title:"In House Use", field:"inhouse_filament", align:"center", bottomCalc:"sum"},
+        {title:"Total Filament", field:"total_filament", downloadName: "Total", align:"center", bottomCalc:"sum"}
+      ]
+    }
+  ],
 });
 
 $("#report-table").tabulator("setData",nestedData);

@@ -133,8 +133,8 @@ class ProfileController extends Controller
           ]);
         }
       
-        return redirect("/profiles")
-          ->with('part_id', $part->id)
+        return redirect()->back()
+          ->with('part_id', 'Toodaloo')
           ->with('success', 'Profile updated!');
     }
     

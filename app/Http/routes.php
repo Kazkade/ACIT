@@ -53,7 +53,10 @@ Route::get('ajax/part_info/{serial}', function($serial) {
     ->header('Content-Type', 'text/json');
 });
 
-// Upload New Ordes
+// Send JSON to PartsController
+Route::post('/parts/update_or_create', "PartsController@update_or_create");
+
+// Upload New Orders
 Route::post('orders/upload', 'OrderController@upload');
 
 // Bag Routes

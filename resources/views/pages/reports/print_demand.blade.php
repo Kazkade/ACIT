@@ -12,61 +12,95 @@
     <h3>
       Print List
     </h3>
-  <table class="table table-sm table-striped table-hover text-center">
-    <thead>
-      <tr>
-        <th scope="col" rowspan=2 class="text-left">Part Name</th>
-        <th scope="col" rowspan=2>Serial</th>
-        <th scope="col" rowspan=2>Version</th>
-        @foreach($printers as $printer)
-          <th>{{$printer->name}}</th>
-        @endforeach
-        
-        <th scope="col" rowspan=3>On Order</th>
-        <th scope="col" rowspan=3>Remaining</th>
-        
-        <th scope="col" rowspan=3 class="text-left">Pods</th>
-      </tr>
-      <tr>
-        <!-- Only to match up double rows. -->
-        @foreach($printers as $printer)
-          <th>Lead</th>
-        @endforeach
-      </tr>
-    </thead>
-    <tbody id="report_body">  
-      <!-- I need to create JSON objects for Filament Colors -->
-      @if(count($report) == 0)
-        <tr><td colspan=30>No parts to print. Creat orders to get started.</td></tr>
-      @else
-        @foreach($report as $row)
-          <tr>
-            <td class="text-left">{{$row->part_name}}</td>
-            <td>{{$row->part_serial}}</td>
-            <td>{{$row->part_version}}</td>
-            @for($i = 0; $i < count($row->profile); $i++)
-              @if($row->profile[$i]->active == 0)
-                <td><span class="text-danger">&#10008</span> <br>{{$row->profile[$i]->lead_time}}</td>
-              @else
-                <td><span class="text-success">&#10004</span><br>{{$row->profile[$i]->lead_time}}</td>
-              @endif
-            @endfor
-            <td >{{$row->on_order}}</td>
-            <td >{{$row->remaining}}</td>
-            <td class="text-left">
-              @for($i = 0; $i < $row->pods; $i++)
-                <a class="btn btn-sm btn-outline-danger disabled" disabled="disabled" href="#">&#10070</a>
-                @if($i > 10)
-                  @break
-                @endif
-              @endfor
-            </td>
-          </tr>
-        @endforeach
-      @endif
-    </tbody>
-  </table>
+    
+    <div id="report-table"></div>
   </div>
   <div class="col-1"></div>
 </div>
+
+<script>
+var data = [
+  @foreach($report as $row)
+    {
+      "part_name": "{{$row->part_name}}",
+      "part_serial": "{{$row->part_serial}}",
+      "part_color": "{{$row->part_color}}",
+      "part_priority": "{{$row->priority}}",
+      "part_priority_value": "{{$row->priority_value}}",
+      "part_version": "{{$row->part_version}}",
+      @for($i = 0; $i < count($row->profile); $i++)
+        @if($row->profile[$i]->active == 0 && $row->profile[$i]->lead_time == 0 )
+          "{{strtolower($row->profile[$i]->printer_name)}}": "✘",
+        @else
+          "{{strtolower($row->profile[$i]->printer_name)}}": "✓ | {{date('H:i', mktime(0,$row->profile[$i]->lead_time))}} | {{$row->profile[$i]->prints}} ❖ ",
+        @endif
+      @endfor
+      "on_order": "{{$row->on_order}}",
+      "to_print": "{{$row->remaining}}",
+      <?php
+        $pods = '';
+        for($i = 0; $i < $row->pods; $i++)
+        {
+          $pods .= '▢';
+          if($i > 10)
+          {
+            break;
+          }
+        }
+        echo '"pods_left": "'.$pods.'",'
+      ?>
+    },
+  @endforeach
+];
+
+$("#report-table").tabulator({
+  layout:"fitColumns", //fit columns to width of table (optional)
+  initialSort: [
+    
+  ],
+  groupBy:["part_priority","part_color"],
+  placeholder:"No parts to show. :( ",
+  columns:[
+    {
+      title: "Part Info",
+      columns: [
+        {title:"Name", field:"part_name", download: false, align: "left", width: 200},
+        {title:"Serial", field:"part_serial", align:"center", width: 110},
+        {title:"Color", field:"part_color", align:"center", width: 120},
+        {title:"Priority", field:"priority", align: "center", visible: false},
+        {title:"Priority Value", field:"priority_value", align: "center", visible: false},
+        {title:"Version", field:"part_version", align:"center", visible:false},
+      ]
+    },
+    {
+      title: "Print Profiles",
+      columns: [
+        @foreach($printers as $printer)
+          {title:"{{$printer->name}}", field:"{{strtolower($printer->name)}}", align:"center", width: 150},
+        @endforeach
+      ]
+    },
+    {
+      title: "Demand",
+      columns: [
+        {title:"On Order", field:"on_order", align:"center", width: 120},
+        {title:"To Print", field:"to_print", align:"center", width: 120},
+        {title:"Pods", field:"pods_left", align:"left", widthGrow: 5},
+        {title:"", field:"spare", align: "center" , width: 20}
+      ]
+    }
+  ],
+  rowFormatter:function(row){
+        //row - row component
+
+        var data = row.getData();
+
+        if(data.col == "blue"){
+            row.getElement().css({"background-color":"#A6A6DF"});
+        }
+    },
+});
+
+$("#report-table").tabulator("setData",data);
+</script>
 @endsection

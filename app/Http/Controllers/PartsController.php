@@ -77,12 +77,15 @@ class PartsController extends Controller
       */
       
       #### Actual Start ##############
-      
-      $parts = Part::orderBy('part_serial', 'asc')->paginate(100);
+      $parts = DB::table('parts')
+        ->orderBy('id', 'asc')
+        ->get();
       
       $printers = DB::table('printers')
         ->where('active', '=', 1)
         ->get();
+      
+      $filaments = DB::table('filaments')->get();
       
       $backstock_location_id = DB::table('locations')
         ->where('location_name', '=', 'Backstock')
@@ -126,7 +129,8 @@ class PartsController extends Controller
       // $posts = DB::select('SELECT * FROM parts');
       return view('pages.parts.index')
         ->with('parts', $parts)
-        ->with('printers', $printers);
+        ->with('printers', $printers)
+        ->with('filaments', $filaments);
     }
 
     /**
@@ -331,7 +335,17 @@ class PartsController extends Controller
         $part = Part::find($id);
         return view('pages.parts.edit')->with('part', $part);
     }
-
+  
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     */
+    public function update_or_create(Request $request)
+    {
+      echo "Request was: ".var_dump($request->all);
+    }
+  
     /**
      * Update the specified resource in storage.
      *

@@ -17,7 +17,7 @@ use App\Http\Controllers\Controller;
 |
 */
 
-Route::get('/', 'PagesController@index');
+Route::get('/', 'DashboardController@index');
 
 Route::get('dashboard', [
     'middleware' => 'auth:api',
@@ -53,15 +53,16 @@ Route::get('ajax/part_info/{serial}', function($serial) {
     ->header('Content-Type', 'text/json');
 });
 
-// Send JSON to PartsController
-Route::post('/parts/update_or_create', "PartsController@update_or_create");
 
-// Upload New Orders
+// Extra Orders Routes
 Route::post('orders/upload', 'OrderController@upload');
+Route::get('deliver_order', 'OrderController@deliver');
 
 // Bag Routes
 Route::post('bags/mark/{id}', 'BagsController@mark');
 Route::post('bags/unmark/{id}', 'BagsController@unmark');
+Route::get('bags/dismantle/{id}', 'BagsController@dismantle');
+Route::get('bags/', 'BagsController@index');
 
 // Report Routes
 Route::get('reports/print_list', 'ReportController@print_list');
@@ -76,6 +77,7 @@ Route::post('printer/toggle/{id}', 'PrinterController@toggle');
 Route::post('printer/destroy/{id}', 'PrinterController@destroy');
 
 // Additional Part Routes
+Route::get('/parts/update_or_create/{json}', "PartsController@update_or_create");
 Route::post('part/moratorium/{id}', 'PartsController@moratorium')->name('parts.moratorium');
 
 // Resource Routes
@@ -86,6 +88,7 @@ Route::resource('orders', 'OrderController');
 Route::resource('deliveries', 'DeliveryController');
 Route::resource('users', 'UserController');
 Route::resource('profiles', 'ProfileController');
+Route::resource('overages', 'OverageController');
 Route::resource('configuration', 'ConfigurationController');
 /*
 |--------------------------------------------------------------------------

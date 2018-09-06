@@ -31,6 +31,9 @@
       <h3>
         Outstanding Orders
       </h3>
+      @if(count($orders) > 0)
+        <a class="btn btn btn-outline-success d-block my-3" href="/deliver_order">Deliver All</a>
+      @endif
       @endif
       <table class="table table-striped table-sm table-hover text-center ">
         <thead>
@@ -38,6 +41,8 @@
             <th scope="col">Serial</th>
             <th scope="col" style="text-align: left !important">Part Name</th>
             <th scope="col">On Order</th>
+            <th scope="col">Filled</th>
+            <th scope="col">Remaining</th>
             <th scope="col">TBD</th>
             <th scope="col" style="text-align: left !important">Marked Bags</th>
           </tr>
@@ -49,6 +54,8 @@
                 <td>{{$order->part_serial}}</td>
                 <td style="text-align: left !important">{{$order->part_name}}</td>
                 <td>{{$order->quantity}}</td>
+                <td>{{$order->filled}}</td>
+                <td>{{$order->quantity - $order->filled}}</td>
                 <td>{{$order->tbd}}</td>
                 <td style="text-align: left !important">
                   @foreach($bags as $bag)
@@ -69,7 +76,7 @@
         </tbody>
       </table>
       @if(count($orders) > 0)
-        <a class="btn btn btn-outline-success d-block my-3" href="/orders/deliver_all">Deliver All</a>
+        <a class="btn btn btn-outline-success d-block my-3" href="/deliver_order">Deliver All</a>
       @endif
     </div>
     <div class="col-2"></div>
@@ -77,6 +84,8 @@
 </div>
 
 <script>
+  
+  
 $(document).ready(function() {
   
   $(function () {

@@ -10,8 +10,9 @@
       @if(Auth::user()->account_type = 2)
         <a href="#" id="add_new_row" class="btn btn-outline-primary">❖ Add New Part</a>
         <a href="#" id="save_changes" class="btn btn-outline-success">✔ Save Changes</a>
+        <span class="text-success ml-2" id="return-message"></span>
       @endif
-      <div id="report-table"></div>
+      <div id="report-table" class="mt-3"></div>
     </div>
   </div>
   <div class="row">
@@ -23,6 +24,7 @@
 var data = [
   @foreach($parts as $row)
     {
+      "id": "{{$row->id}}",
       "status": "unchanged",
       "updated_at":"{{date('m/d/y @ H:i', strtotime($row->updated_at))}}",
       "part_name": "{{$row->part_name}}",
@@ -45,7 +47,8 @@ $("#report-table").tabulator({
   layout:"fitColumns", //fit columns to width of table (optional)
   placeholder:"No parts to show. :( ",
   columns:[
-    {title:"Status", field:"status", align:"center", visible: true, editor: false},
+    {title:"ID", field:"id", align:"center", visible: false, editor: false},
+    {title:"Status", field:"status", align:"center", visible: false, editor: false},
     {title:"Updated", field:"updated_at", align:"center", width: 150, editor: false},
     {title:"Name", field:"part_name", download: false, align: "left", editor: editable, width: 250},
     {title:"Serial", field:"part_serial", align:"center", width: 110, editor: editable},
@@ -83,14 +86,12 @@ $("#report-table").tabulator({
     var change = cell.getRow().getData();
     change.status = "update";
     $("#report-table").tabulator("updateData", [change]);
-    $('#report-table').tabulator('redraw', false);
   },
 });
   
 $("#report-table").tabulator("setData",data);
   
-var updatedRows = [
-];
+var updatedRows = [];
 
 
 $('#save_changes').on('click', function() {
@@ -100,52 +101,50 @@ $('#save_changes').on('click', function() {
   $('.tabulator-row').each(function(i, el){
     
     var $tds =  $(this).find('.tabulator-cell');
-    if($tds.eq(0).text() != 'unchanged')
+    if($tds.eq(1).text() != 'unchanged')
     {
       var ar = {
-        "status": $tds.eq(0).text(),
-        "part_name": $tds.eq(2).text(),
-        "part_serial": $tds.eq(3).text(),
-        "part_color": $tds.eq(4).text(),
-        "part_version": $tds.eq(5).text(),
-        "part_cleaned": $tds.eq(6).text(),
-        "part_mass": $tds.eq(7).text()
+        "id": $tds.eq(0).text(),
+        "status": $tds.eq(1).text(),
+        "part_name": $tds.eq(3).text(),
+        "part_serial": $tds.eq(4).text(),
+        "part_color": $tds.eq(5).text(),
+        "part_version": $tds.eq(6).text(),
+        "part_cleaned": $tds.eq(7).attr("aria-checked"),
+        "part_mass": $tds.eq(8).text(),
       }
       
       updatedRows.data.push(ar);
     }
   });
   
-  console.log("Changed/New Rows");
-  console.log(updatedRows);
-  
   $.ajax({
-    type: "POST",
+    type: "GET",
     headers: {
       'X-CSRF-TOKEN': "{{ csrf_token() }}",
     },
-    url: "parts/update_or_create",
-    data: updatedRows,
-    success: function() {
-      location.refresh();
-    },
-    dataType: "JSON"
+    dataType: "JSON",
+    url: "parts/update_or_create/"+JSON.stringify(updatedRows.data),
+    success: function(msg) {
+      $('#return-message').text(msg);
+      location.reload();
+    }
   });
-  
 });
   
 $('#add_new_row').on('click', function() {
   var o = {
-    "status":"update", 
-     "part_name":"New Part", 
-     "part_serial":"XX-XX0000", 
-     "part_color": "Black",
-     "part_version": "0.0.0",
-     "part_mass": 0,
-     "part_cleaned":0, 
-     "part_stock": 0, 
-     "part_bags": 0, 
-     "part_total": 0
+    "id": 0,
+    "status":"new", 
+    "part_name":"New Part", 
+    "part_serial":"XX-XX0000", 
+    "part_color": "Black",
+    "part_version": "0.0.0",
+    "part_mass": 0,
+    "part_cleaned":0, 
+    "part_stock": 0, 
+    "part_bags": 0, 
+    "part_total": 0
   }
   $("#report-table").tabulator("addRow", o, true);
 });

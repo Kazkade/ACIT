@@ -4,18 +4,16 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
+use Auth;
 use DB;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use App\Part;
-use App\Transfer;
-use App\Location;
-use App\Inventory;
-use App\Bag;
+use App\Overage;
 
 //use DB; // For using SQL syntax. Try to stick to Eloquent unless it's absolutely necessary.
 
-class DeliveryController extends Controller
+class OverageController extends Controller
 {
     public function __construct()
     {
@@ -28,46 +26,37 @@ class DeliveryController extends Controller
      */
     public function index()
     { 
-      DB::enableQueryLog();
-      
-      // Quantity Delivered
-      $bags = DB::table('bags')
-        ->where('delivered', '=', 0)
+     
+      $overages = DB::table('overages')
+        ->join('parts', 'parts.id', '=', 'overages.part_id')
         ->get();
       
-      // Get All Orders
-      $orders = DB::table('orders')
-        ->select(DB::raw('`updated_at`, MAX(`priority`) as "priority", `part_id`, SUM(`quantity`) as "ordered"'))
-        ->groupBy('part_id')
-        ->get();
-      
-      foreach($orders as $order)
-      {
-        $order->bag_count = 0;
-        foreach($bags as $bag)
-        {
-          if($bag->part_id == $order->part_id)
-          {
-            $order->bag_count++;
-          }
-        }
-      }
-      
-      $users = DB::table('users')
-        ->select(DB::raw('`id`, `first_name`, `last_name`'))
-        ->get();
-      
-      $parts = Part::all();
-      
-      // Testing (Uncomment when using.)
-      //dd(DB::getQueryLog());
-      
-      // Return View
-      return view('pages.deliveries.index')
-        ->with('bags', $bags)
-        ->with('orders', $orders)
-        ->with('users', $users)
-        ->with('parts', $parts);
+      return view('pages.overages.index')
+        ->with('overages', $overages);
+    }
+  
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function resolve($id)
+    {
+      Overage::where('id', '=', $id)
+        ->update(['resolved' => 1]);
+
+      // The creation form is on the sidebar for admins.
+      return redirect()->route('overages.index')->with('error', 'Something went wrong.');
+    }
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function unresolve($id)
+    {
+      // The creation form is on the sidebar for admins.
+      return redirect()->route('overages.index')->with('error', 'Unresolving overages should be handled by the database administrator for now.');
     }
 
     /**
@@ -78,10 +67,9 @@ class DeliveryController extends Controller
     public function create()
     {
         // The creation form is on the sidebar for admins.
-        return view('pages.deliveries.index');
+        return redirect()->route('overages.index')->with('error', 'You shouldn\'t be using that route.');
     }
-
-
+  
     /**
      * Store a newly created resource in storage.
      *
@@ -90,7 +78,8 @@ class DeliveryController extends Controller
      */
     public function store(Request $request)
     {
-        return redirect("/deliveries")->with('success', 'Part '.$part->part_serial.' Created! '.$deleted_inventories.' were deleted.');
+        //
+        return redirect()->route('overages.index')->with('error', 'You shouldn\'t be using that route.');
     }
 
     /**
@@ -101,8 +90,7 @@ class DeliveryController extends Controller
      */
     public function show($id)
     {
-      
-        return view('pages.deliveries.show');
+      return redirect()->route('overages.index')->with('error', 'You shouldn\'t be using that route.');
     }
 
     /**
@@ -113,7 +101,7 @@ class DeliveryController extends Controller
      */
     public function edit($id)
     {
-        return view('pages.deliveries.edit');
+        return redirect()->route('overages.index')->with('error', 'You shouldn\'t be using that route.');
     }
 
     /**
@@ -125,7 +113,8 @@ class DeliveryController extends Controller
      */
     public function update(Request $request, $id)
     {
-        return redirect("/deliveries")->with('success', 'Part Created!');
+        //
+        return redirect()->route('overages.index')->with('error', 'You shouldn\'t be using that route.');
     }
 
     /**
@@ -136,8 +125,10 @@ class DeliveryController extends Controller
      */
     public function destroy($id)
     {    
-        return redirect()->route('deliveries.index')->with('success', 'Part '.$part->part_serial.' deleted. '.$deleted_inventories.' were deleted.');
+        return redirect()->route('overages.index')->with('error', 'You shouldn\'t be using that route.');
 
     }
+  
+    
 }
 

@@ -5,11 +5,6 @@
   <div class="row">
     <div class="col-2"> </div>
     <div class="col-8">
-      @if(Auth::user()->account_type < 2)
-      <h5>
-        You need to be an admin to view this.
-      </h5>
-      @else
       <h3>
         Configuration
       </h3>
@@ -68,7 +63,6 @@
         </div>
       </div>
     </div>
-    @endif
     <div class="col-2"></div>
   </div>
   <div class="row">

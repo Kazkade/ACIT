@@ -30,7 +30,9 @@ class TransfersController extends Controller
     public function index()
     {
         //
-        $transfers = DB::table('transfers')->paginate(50);
+        $transfers = DB::table('transfers')
+          ->orderBy('updated_at', 'desc')
+          ->paginate(50);
         $locations = Location::all();
         $users = User::all();
         $parts = Part::all();
@@ -48,13 +50,38 @@ class TransfersController extends Controller
      */
     public function create()
     {
-      
-        $locations = Location::where('location_default', 1)->get();  
-        $parts = Part::all();
-          
-        return view('pages.transfers.create')
-          ->with('locations', $locations)
-          ->with('parts', $parts);
+      return redirect()->route('transfers.index');
+    }
+  
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function reverse($id)
+    {
+      // Find Transfer
+      $transfer = Transfer::find($id);
+      // Create Duplicate transfer with reversed locations.
+      $reverse = $transfer;
+      $reverse->user_id = Auth::user()->id;
+      $reverse->reversal = 1;
+      $reverse->save();
+
+      // Update From Inventory
+      $from_inventory = DB::table('inventories')
+        ->where('part_id', '=', $reverse->part_id)
+        ->where('location_id', '=', $reverse->from_location_id)
+        ->decrement('from_total', $reverse->quantity);
+
+      // Update Pass Inventory
+      $reverse_inventory = DB::table('inventories')
+        ->where('part_id', '=', $reverse->part_id)
+        ->where('location_id', '=', $reverse->to_location_id)
+        ->decrement('to_total', $reverse->quantity);
+
+      return redirect()->route('transfers.create', ['transfer_type' => $request->transfer_type])
+        ->with('success','Transfer reversed!');
     }
   
     /**
@@ -80,7 +107,7 @@ class TransfersController extends Controller
         $pass_transfer->quantity = $request->input('quantity');
         $pass_transfer->from_location_id = $request->input('from_location_id');
         $pass_transfer->to_location_id = $request->input('to_location_id');
-      
+        
         $fail_transfer = new Transfer;
         $fail_transfer->part_id = $request->input('part_id');
         $fail_transfer->user_id = Auth::user()->id;
@@ -133,10 +160,17 @@ class TransfersController extends Controller
         }
       
         // Save Everything
-        $pass_transfer->save();
-        $fail_transfer->save();
-      
-        return redirect()->route('transfers.create', ['transfer_type' => $request->transfer_type])->with('success','Transfer Recorded!');
+        if($pass_transfer->quantity > 0)
+        {
+          $pass_transfer->save();
+        }
+        if($fail_transfer->quantity > 0)
+        {
+          $fail_transfer->save();
+        }
+        
+        return redirect()->route('transfers.create', ['transfer_type' => $request->transfer_type])
+          ->with('success','Transfer Recorded! '.$request->input('created_bags').' bag(s) created.');
         
     }
 

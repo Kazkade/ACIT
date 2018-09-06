@@ -94,7 +94,7 @@ class PartsController extends Controller
       $backstock_location_id = $backstock_location_id[0]->id;
       
       $inventories = DB::table('inventories')
-        ->select(DB::raw('part_id, SUM(`to_total`+`from_total`) as "inventory"'))
+        ->select(DB::raw('part_id, `location_id`, SUM(`to_total`+`from_total`) as "inventory"'))
         ->where('location_id', '=', $backstock_location_id)
         ->groupBy('part_id')
         ->get();
@@ -341,9 +341,36 @@ class PartsController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      */
-    public function update_or_create(Request $request)
+    public function update_or_create($json)
     {
-      echo "Request was: ".var_dump($request->all);
+      $var = json_decode($json);
+      
+      $new_entries = 0;
+      $updated_entries = 0;
+      
+      foreach($var as $row)
+      {
+        if($row->status === 'new')
+        {
+          $new_entries++;
+          $part = new Part();
+        }
+        
+        if($row->status === 'update')
+        {
+          $updated_entries++;
+          $part = Part::find($row->id);
+        }
+        
+        $part->part_name = $row->part_name;
+        $part->part_serial = $row->part_serial;
+        $part->part_version = $row->part_version;
+        $part->part_color = $row->part_color;
+        $part->part_cleaned = ($row->part_cleaned === "true") ? 1 : 0;
+        $part->part_mass = $row->part_mass;
+        $part->save();
+      }
+      return json_encode($new_entries." new entries and ".$updated_entries." updated entries.");
     }
   
     /**

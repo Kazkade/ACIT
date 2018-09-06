@@ -17,9 +17,6 @@
             <?php if($_GET['transfer_type'] == 2) {?>
                Backstock Transfer
             <?php } ?>
-            <?php if($_GET['transfer_type'] == 3) {?>
-               Audit Transfer
-            <?php } ?>
           </div>
           <div class="card-body">
             <div class="form-row">
@@ -131,8 +128,8 @@ $(document).ready(function() {
   // Initialize The Form Transfer Type
   $('#transfer_type').attr('value', transfer_type);
   
-  $('#qa_row').hide("swing", function() {});
-  $('#bagging_row').hide("swing", function() {});
+  $('#qa_row').hide("blind", function() {});
+  $('#bagging_row').hide("blind", function() {});
   
   // Part Info Container
   var partInfo;
@@ -210,15 +207,15 @@ $(document).ready(function() {
     {
       $('#from_location_id').val(locations.Collections);
       $('#to_location_id').val(locations.Backstock);
-      $('#qa_row').show("blind", function() {});
-      $('#bagging_row').show("blind", function() {});
+      $('#qa_row').show("highlight", function() {});
+      $('#bagging_row').show("highlight", function() {});
     }
     
     if(transfer_type == 1 && part_cleaned == 1)
     {
       $('#from_location_id').val(locations.Collections);
       $('#to_location_id').val(locations.Processing);
-      $('#qa_row').show("blind", function() {});
+      $('#qa_row').show("highlight", function() {});
       $('#bagging_row').hide("blind", function() {});
     }
     
@@ -227,16 +224,8 @@ $(document).ready(function() {
       $('#from_location_id').val(locations.Processing);
       $('#to_location_id').val(locations.Backstock);
       $('#to_location_id').removeAttr('readonly');
-      $('#qa_row').show("blind", function() {});
-      $('#bagging_row').show("blind", function() {});
-    }
-  
-    if(transfer_type == 3)
-    {
-      $('#from_location_id').val(locations.Audit);
-      $('#to_location_id').removeAttr('readonly');
-      $('#qa_row').show("blind", function() {});
-      $('#bagging_row').show("blind", function() {});
+      $('#qa_row').show("highlight", function() {});
+      $('#bagging_row').show("highlight", function() {});
     }
     
     if(part_cleaned == 2)

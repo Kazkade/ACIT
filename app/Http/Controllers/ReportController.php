@@ -148,6 +148,7 @@ class ReportController extends Controller
       $orders = DB::table('orders')->get();
       
       // Get Inventory IDs
+      $initial_id = DB::table('locations')->where('location_name', '=', 'Initial')->first(); $initial_id = $initial_id->id;
       $collections_id = DB::table('locations')->where('location_name', '=', 'Collections')->first(); $collections_id = $collections_id->id;
       $processing_id = DB::table('locations')->where('location_name', '=', 'Processing')->first(); $processing_id = $processing_id->id;
       $backstock_id = DB::table('locations')->where('location_name', '=', 'Backstock')->first(); $backstock_id = $backstock_id->id;
@@ -156,37 +157,30 @@ class ReportController extends Controller
       
       foreach($parts as $part)
       {
+        $part->collections = 0; // Initialize this.
+        $part->processing = 0; // Initialize this.
+        $part->backstock = 0; // Initialize this.
+        $part->fails = 0; // Initialize this.
+        $part->inhouse = 0; // Initialize this.
         // Get full inventories.
         foreach($inventories as $inventory)
         {
-          if($inventory->part_id && $part->id)
+          if($inventory->part_id == $part->id)
           {
-            if($inventory->location_id == $collections_id) 
+            switch($inventory->location_id)
             {
-              $part->collections = $inventory->to_total - $inventory->from_total;
+              case $collections_id: $part->collections += $inventory->from_total; break;
+              case $initial_id: $part->collections += $inventory->from_total; break;
+              case $processing_id: $part->processing = $inventory->to_total - $inventory->from_total; break;
+              case $backstock_id: $part->backstock = $inventory->to_total - $inventory->from_total; break;
+              case $fails_id: $part->fails = $inventory->to_total - $inventory->from_total; break;
+              case $inhouse_id: $part->inhouse = $inventory->to_total - $inventory->from_total; break;
             }
-                      
-            if($inventory->location_id == $processing_id) 
-            {
-              $part->processing = $inventory->to_total - $inventory->from_total;
-            }
-                      
-            if($inventory->location_id == $backstock_id) 
-            {
-              $part->backstock = $inventory->to_total - $inventory->from_total;
-            }
-                      
-            if($inventory->location_id == $fails_id) 
-            {
-              $part->fails = $inventory->to_total - $inventory->from_total;
-            }
-            if($inventory->location_id == $inhouse_id) 
-            {
-              $part->inhouse = $inventory->to_total - $inventory->from_total;
-            }
+            
           }
         }
       }
+      
       
       // Build Report
       $table = array();
@@ -196,18 +190,17 @@ class ReportController extends Controller
         $row->part_name = $part->part_name;
         $row->part_serial = $part->part_serial;
         $row->part_color = $part->part_color;
-        $row->part_mass = $part->part_mass;
-        $row->part_waste = $part->part_waste;
-        $row->parts_created = $part->collections;
-        $row->parts_failed = $part->fails;
-        $row->passed_filament = $part->backstock * ($part->part_mass);
-        $row->fallout_filament = $part->fails * ($part->part_mass);
-        $row->scrap_filament = $part->collections * ($part->part_waste);
-        $row->inhouse_filament = $part->inhouse * ($part->part_mass);
-        $row->total_filament = $part->collections * ($part->part_mass + $part->part_waste);
+        $row->part_mass = (float)($part->part_mass);
+        $row->part_waste = (float)($part->part_waste);
+        $row->parts_created = (float)($part->collections);
+        $row->parts_failed = (float)($part->fails);
+        $row->passed_filament = (float)($part->backstock * ($part->part_mass));
+        $row->fallout_filament = (float)($part->fails * ($part->part_mass));
+        $row->scrap_filament = (float)($part->collections * ($part->part_waste));
+        $row->inhouse_filament = (float)($part->inhouse * ($part->part_mass));
+        $row->total_filament = (float)($part->collections * ($part->part_mass + $part->part_waste));
         array_push($table, $row);
       }
-      
       // Seperate Rows by Color
       // // Get filament colors among parts.
       $filament_colors = array();

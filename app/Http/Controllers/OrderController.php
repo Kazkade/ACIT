@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
+use Auth;
 use DB;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
@@ -11,6 +12,8 @@ use App\Part;
 use App\Transfer;
 use App\Location;
 use App\Order;
+use App\Overage;
+use App\Delivery;
 use App\Inventory;
 
 //use DB; // For using SQL syntax. Try to stick to Eloquent unless it's absolutely necessary.
@@ -33,6 +36,7 @@ class OrderController extends Controller
         ->join('parts', 'orders.part_id', '=', 'parts.id')
         ->select('orders.*', 'parts.part_name', 'parts.part_serial', DB::raw('SUM(`orders`.`quantity`) as "total"'))
         ->groupBy('parts.id')
+        ->where('orders.quantity', '>', 'orders.filled')
         ->get();
       
       
@@ -91,6 +95,101 @@ class OrderController extends Controller
         // The creation form is on the sidebar for admins.
         return view('pages.orders.index');
     }
+  
+    
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function deliver() 
+    {
+      
+      DB::enableQueryLog();
+      
+      //$bags = DB::raw('SELECT *, SUM(`quantity`) as "total" FROM `bags` WHERE `marked` = 1 GROUP BY `part_id`')
+        
+      $bags = DB::table('bags')
+        ->select(DB::raw('id, part_id, SUM(`quantity`) as "total"'))
+        ->where('marked', '=', 1)
+        ->where('delivered', '=', 0)
+        ->groupBy('part_id')
+        ->get();
+      
+      $orders = DB::table('orders')
+        ->where('quantity','>','filled')
+        ->get();
+      /*
+      Get list of bags with total quantities marked for delivery 
+        SELECT *, SUM(`quantity`) as "total" FROM `bags` WHERE `marked` = 1 GROUP BY `part_id`
+      Loop through bags, then orders by MO asc, 
+        SELECT * FROM `orders`WHERE `filled` < `quantity` order by `mo` asc 
+      Apply to orders as they appear with the same part id, decrementing "total" from bags
+        ** Check if bag can fill fulll order, first.
+      After the loop, if "total" is still greater than 0, create an overage.
+      */
+      // Create Delivery for reference.
+      $delivery = new Delivery();
+      $delivery->user_id = Auth::user()->id;
+      $delivery->save();
+      $delivery = DB::table('deliveries')
+        ->orderBy('updated_at', 'desc')
+        ->first();
+      
+      foreach($bags as $bag)
+      {
+        echo "<br>Bag with part id ".$bag->part_id." showing a total of ".$bag->total."<br> \r\n";
+        foreach($orders as $order)
+        {
+          if($bag->part_id == $order->part_id)
+          {
+            echo "- Order with MO ".$order->mo." needs ".($order->quantity - $order->filled)."<br> \r\n";
+            if($order->quantity - $order->filled > $bag->total)
+            {
+              $order->filled += $bag->total;
+              Order::where('id', $order->id)
+                ->update(['filled' => $bag->total]);
+              echo "All orders for part with id of ".$bag->part_id." have been filled.<br> \r\n";
+            }
+            else
+            {
+              echo "Applying ".($order->quantity - $order->filled)." parts to order.<br>\r\n";
+              $bag->total -= $order->quantity - $order->filled;
+              $order->filled = $order->quantity;
+              
+              Order::where('id', $order->id)
+                ->update(['filled' => $order->quantity]);
+              
+            }
+          }
+        }
+        // Overages
+        if($bag->total > 0)
+        {
+          $overage = new Overage();
+          $overage->part_id = $bag->part_id;
+          $overage->quantity = $bag->total;
+          $overage->delivery_id = $delivery->id;
+          $overage->save();
+          echo "<br> Overage for ".$bag->total." for part with ID ".$bag->part_id." was created.";
+        }
+      }
+      
+      //dd(DB::getQueryLog());
+      
+      // Mark All Bags as Delivered with details.
+      $bags = DB::table('bags')
+        ->where('marked', '=', 1)
+        ->where('delivered', '=', 0)
+        ->get();
+      foreach($bags as $bag)
+      {
+        $bag->delivered = 1;
+        $bag->delivery_id = $delivery->id;
+        $bag->delivered_by = Auth::user()->id;
+      }      
+
+    }
 
     /**
      * Store a newly created resource in storage.
@@ -112,11 +211,7 @@ class OrderController extends Controller
      */
     public function show($id)
     {
-      
-        return view('pages.orders.show')
-          ->with('inventories', $inventories)
-          ->with('locations', $locations)
-          ->with('part', $part);
+      return view('pages.orders.index');
     }
 
     /**

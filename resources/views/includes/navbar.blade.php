@@ -2,10 +2,10 @@
    @if(Auth::guest())
       style="background-color: #263238"
    @else
-      @if(Auth::user()->account_type == 2)
+      @if(Auth::user()->admin == 1)
         style="background-color: #3F729B"
       @else
-        style="background-color: #263238"
+        style="background-color: #42f46e"
       @endif
    @endif
 
@@ -30,12 +30,10 @@
           <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
             <a class="dropdown-item" href="/transfers/create?transfer_type=1">Collections</a>
             <a class="dropdown-item" href="/transfers/create?transfer_type=2">Processing</a>
-            @if(Auth::user()->account_type == 2)
-              <div class="dropdown-divider"></div>
-              <a class="dropdown-item" href="/transfers/create?transfer_type=3">Audit</a>
-            @endif
             <div class="dropdown-divider"></div>
             <a class="dropdown-item" href="/deliveries">Delivery</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="/transfers">All Transfers</a>
           </div>
         </li>
         <!-- Data -->
@@ -45,27 +43,28 @@
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
             <a class="dropdown-item" href="{{route('parts.index')}}">Parts</a>
-            @if(Auth::user()->account_type == 2)
+            @if(Auth::user()->admin == 1)
               <a class="dropdown-item" href="/profiles">Profiles</a>
               <div class="dropdown-divider"></div>
             @endif
             <a class="dropdown-item" href="{{route('locations.index')}}">Locations</a>
             <a class="dropdown-item" href="{{route('transfers.index')}}">Transfers</a>
-            @if(Auth::user()->account_type == 2)
+            <a class="dropdown-item" href="/bags">Bags</a>
+            @if(Auth::user()->admin == 1)
               <div class="dropdown-divider"></div>
               <a class="dropdown-item" href="/orders">Orders</a>
               <a class="dropdown-item" href="/deliveries">Deliveries</a>
+              <a class="dropdown-item" href="/overages">Overages</a>
             @endif
           </div>
         </li>
-        @if(Auth::user()->account_type == 2)
+        @if(Auth::user()->admin == 1)
         <!-- Admin -->
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             Admin
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-            <a class="dropdown-item" href="/transfers/create?transfer_type=3">Audit</a>
             <a class="dropdown-item disabled" disabled="disabled" href="#">Overrides</a>
             <div class="dropdown-divider"></div>
             <a class="dropdown-item" href="{{route('configuration.index')}}">Configuration</a>
@@ -81,11 +80,11 @@
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
             <a class="dropdown-item" href="/reports/print_list">Print List</a>
-            <a class="dropdown-item disabled" disabled="disabled" href="#">Delivery Report</a>
+            <a class="dropdown-item disabled" disabled="disabled" href="">Delivery Report</a>
             <a class="dropdown-item" href="/reports/filament_usage">Filament Usage Report</a>
             <a class="dropdown-item" href="/reports/weekly_scrap">Weekly Scrap Report</a>
             <div class="dropdown-divider"></div>
-            <a class="dropdown-item disabled" disabled="disabled" href="#">Other Reports</a>
+            <a class="dropdown-item disabled" disabled="disabled" href="">Other Reports</a>
           </div>
         </li>
       </ul>
@@ -103,7 +102,10 @@
                       {{Auth::user()->first_name}} {{Auth::user()->last_name}}<span class="caret"></span>
                   </a>
                   <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                    <a class="dropdown-item" href="{{ url('/logout') }}"><i class="fa fa-btn fa-sign-out"></i>Logout</a>
+                    <a class="dropdown-item disabled" disabled="disabled" href=""><i class="fa fa-btn fa-file-text-o mr-3"></i>Stats</a>
+                    <a class="dropdown-item" href=""><i class="fa fa-btn fa-info mr-3 "></i>Wiki</a>
+                    <a class="dropdown-item" href=""><i class="fa fa-btn fa-question mr-3"></i>About ACIT</a>
+                    <a class="dropdown-item" href="{{ url('/logout') }}"><i class="fa fa-btn fa-sign-out mr-3"></i>Logout</a>
                   </div>
               </li>
           @endif

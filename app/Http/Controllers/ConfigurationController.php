@@ -26,8 +26,10 @@ class ConfigurationController extends Controller
     public function index()
     { 
       $printers = DB::table('printers')->get();
+      $filaments = DB::table('filaments')->get();
       return view('pages.configuration.index')
-        ->with('printers', $printers);
+        ->with('printers', $printers)
+        ->with('filaments', $filaments);
     }
 
     /**

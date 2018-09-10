@@ -16,34 +16,6 @@
         Filament Usage Report<br>
       </h3>
       <a href="#" id="download_as_pdf" class="btn btn-outline-success no-print">Download as PDF</a>
-      <!--
-      <span class="float-right mb-3">
-        <div class="input-group mb-3">
-          <div class="input-group-prepend">
-            <select id="filter-field" class="btn btn-outline-dark">
-              <option href="#">Name</option>
-              <option href="#">Serial</option>
-              <option href="#">Color</option>
-              <option href="#">Mass</option>
-              <option href="#">Total Filament</option>
-            </select>
-            <select  id="filter-type" class="btn btn-outline-dark">
-              <option value="=">=</option>
-              <option value="<">&lt;</option>
-              <option value="<=">&lt;=</option>
-              <option value=">">&gt;</option>
-              <option value=">=">&gt;=</option>
-              <option value="!=">!=</option>
-              <option selected value="like">like</option>
-            </select>
-          </div>
-          <input type="text" class="form-control" id="filter-value" placeholder="Criteria" aria-label="Text input with segmented dropdown button">
-          <div class="input-group-append">
-            <button id="filter-clear" class="btn btn-outline-dark">Clear</button>
-          </div>
-        </div>
-      </span>
-      -->
     </div>
   </div>
   <div class="row">
@@ -119,10 +91,10 @@ $("#report-table").tabulator({
     {
       title: "Part Info",
       columns: [
-        {title:"Name", field:"part_name", download: false, align: "let", width:300},
-        {title:"Serial", field:"part_serial", align:"center", width: 100},
-        {title:"Color", field:"part_color", align:"center", visible:false},
-        {title:"Mass", field:"part_mass", align:"center", width: 100},
+        {title:"ID", field:"part_name", visible: false, download: false},
+        {title:"Date", field:"date", align:"center", width: 100},
+        {title:"Part", field:"part_name", align:"center", visible:false},
+        {title:"Serial", field:"part_mass", align:"center", width: 100},
         {title:"Waste", field:"part_waste", align:"center", width: 100},
         {title:"Produced", field:"parts_created", align:"center", bottomCalc:"sum"},
         {title:"Failed", field:"parts_failed", align:"center", bottomCalc:"sum"},

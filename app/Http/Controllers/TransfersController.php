@@ -50,7 +50,37 @@ class TransfersController extends Controller
      */
     public function create()
     {
-      return redirect()->route('transfers.index');
+      $locations = Location::where('location_default', 1)->get();
+      $parts = Part::all();	  
+      
+      $transfers = DB::table('transfers')
+        ->join('parts', 'parts.id', '=', 'transfers.part_id')
+        ->join('users', 'users.id', '=', 'transfers.user_id')
+        ->select('parts.*', 'transfers.*', DB::raw('CONCAT(`users`.`first_name`, " ",`users`.`last_name`) as "tech_name"'))
+        ->orderBy('transfers.updated_at', 'desc')
+        ->take(20)
+        ->get();
+      
+      foreach($transfers as $transfer)
+      {
+        foreach($locations as $location)
+        {
+          if($location->id == $transfer->to_location_id)
+          {
+            $transfer->to_name = $location->location_name;
+          }
+          
+          if($location->id == $transfer->from_location_id)
+          {
+            $transfer->from_name = $location->location_name;
+          }
+        }
+      }
+
+      return view('pages.transfers.create')	 
+        ->with('locations', $locations)
+        ->with('transfers', $transfers)
+        ->with('parts', $parts);
     }
   
     /**
@@ -63,7 +93,11 @@ class TransfersController extends Controller
       // Find Transfer
       $transfer = Transfer::find($id);
       // Create Duplicate transfer with reversed locations.
-      $reverse = $transfer;
+      $reverse = new Transfer();
+        $reverse->part_id = $transfer->part_id;
+        $reverse->to_location_id = $transfer->to_location_id;
+        $reverse->from_location_id = $transfer->from_location_id;
+        $reverse->quantity = $transfer->quantity;
       $reverse->user_id = Auth::user()->id;
       $reverse->reversal = 1;
       $reverse->save();
@@ -80,7 +114,7 @@ class TransfersController extends Controller
         ->where('location_id', '=', $reverse->to_location_id)
         ->decrement('to_total', $reverse->quantity);
 
-      return redirect()->route('transfers.create', ['transfer_type' => $request->transfer_type])
+      return redirect()->route('transfers.index')
         ->with('success','Transfer reversed!');
     }
   
@@ -94,10 +128,9 @@ class TransfersController extends Controller
     {
         $this->validate($request, [
           'part_serial' => 'required',
-          'quantity' => 'required',
-          'fails' => 'required',
           'bag_amount' => 'required',
-          'fail_location_id' => 'required',
+          'to_locations_id' => 'required',
+          'from_location_id' => 'required',
         ]);
       
         // Create Part

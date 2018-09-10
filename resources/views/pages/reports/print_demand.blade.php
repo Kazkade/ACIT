@@ -91,14 +91,19 @@ $("#report-table").tabulator({
     }
   ],
   rowFormatter:function(row){
-        //row - row component
+    //row - row component
+    
+    var data = row.getData();
 
-        var data = row.getData();
-
-        if(data.col == "blue"){
-            row.getElement().css({"background-color":"#A6A6DF"});
-        }
-    },
+    switch(data.part_color) {
+      @foreach($filaments as $filament)
+        case "{{$filament->filament_name}}": 
+          row.getElement().css(
+            {"background-color":"{{$filament->background_color}}", "color": "{{$filament->text_color}}"}); 
+          break;
+      @endforeach
+    };
+  },
 });
 
 $("#report-table").tabulator("setData",data);

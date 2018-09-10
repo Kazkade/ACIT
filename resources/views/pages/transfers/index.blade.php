@@ -11,7 +11,6 @@
       <table class="table table-striped table-sm table-hover text-center ">
         <thead>
           <tr class="text-center">
-            <th scope="col">Edit</th>
             <th scope="col">Updated</th>
             <th scope="col">Tech</th>
             <th scope="col" style="text-align: left !important">Part Name</th>
@@ -20,13 +19,17 @@
             <th scope="col">From</th>
             <th scope="col"></th>
             <th scope="col">To</th>
+            <th scope="col">Reverse</th>
           </tr>
         </thead>
         <tbody>
           @if(count($transfers) > 0)
             @foreach($transfers as $transfer)
-              <tr>
-                <td><a href="{{route('transfers.show', $transfer->id)}}" class="btn btn-sm btn-outline-secondary d-block">&#10070</a></td>
+              @if($transfer->reversal == 1)
+                <tr class="text-danger">
+              @else
+                <tr>
+              @endif
                 <td scope="row">{{date('d/m/y @ H:i', strtotime($transfer->updated_at))}}</td>
                 <td>
                   @foreach($users as $user)
@@ -57,7 +60,11 @@
                     @endif
                   @endforeach
                 </td>
-                <td>&#8658</td>
+                @if($transfer->reversal == 1)
+                  <td>&#8656</td>
+                @else
+                  <td>&#8658</td>
+                @endif
                 <td>
                   @foreach($locations as $location)
                     @if($location->id == $transfer->to_location_id)
@@ -65,6 +72,7 @@
                     @endif
                   @endforeach
                 </td>
+                <td><a href="/transfers/reverse/{{$transfer->id}}" class="btn btn-sm btn-outline-secondary d-block">&#8652</a></td>
               </tr>
             @endforeach 
           @else

@@ -12,7 +12,7 @@
           </h3>
       </div>
       <br>
-        {{$parts->links()}}
+        
         <table class="table table-striped table-sm table-hover text-center align-middle">
           <thead>
             <tr>
@@ -76,7 +76,7 @@
           </tbody>
         </table>
 
-        {{$parts->links()}}
+        
       </div>
     </div>
   </div>
@@ -88,13 +88,24 @@
 </div>
 <script>
 $(document).ready(function() {
-  function scrollTo(hash) {
-    var id = 1;
-    @if(isset($part_id))
-      var id = {{$part_id->part_id}};
-    @endif
-    location.hash = "#part_"+id;
+  <?php
+    if(!empty($_GET['anchor']))
+    {
+      echo 'var id = '.$_GET['anchor'].';';
+    }
+    else
+    {
+      echo 'var id = 1;';
+    }
+  ?>
+  
+  var elmnt = document.getElementById("part_"+(id-1));
+  try {
+    elmnt.scrollIntoView();
+  } catch(err) {
+    console.log("Whoops. < 1 ID number");
   }
+  $("#part_"+id).effect('highlight',{},1000); 
 });
 </script>
 @endsection

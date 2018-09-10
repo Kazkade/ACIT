@@ -41,7 +41,11 @@ var data = [
   @endforeach
 ];
   
-var editable = @if(Auth::user()->account_type = 2) true @else false @endif ;
+@if(Auth::user()->admin = 1) 
+  var editable = true ;
+@else 
+  var editable = false ;
+@endif
   
 $("#report-table").tabulator({
   layout:"fitColumns", //fit columns to width of table (optional)
@@ -52,7 +56,7 @@ $("#report-table").tabulator({
     {title:"Updated", field:"updated_at", align:"center", width: 150, editor: false},
     {title:"Name", field:"part_name", download: false, align: "left", editor: editable, width: 250},
     {title:"Serial", field:"part_serial", align:"center", width: 110, editor: editable},
-    {title:"Color", field:"part_color", align:"center", width: 120, editor:"select", editorParams:{
+    {title:"Color", field:"part_color", align:"center", width: 180, editor:"select", editorParams:{
       @foreach($filaments as $filament)
         "{{$filament->filament_name}}":"{{$filament->filament_name}}",
       @endforeach
@@ -63,24 +67,29 @@ $("#report-table").tabulator({
     {title:"Stock", field:"part_stock", align:"center", editor: false},
     {title:"Bags", field:"part_bags", align:"center", editor: false},
     {title:"Total", field:"part_total", align:"center", editor: false},
-    {title:"View", field:"part_view", width:80, formatter:function(cell, formatterParams){
+    {title:"View", field:"part_view", width:150, formatter:function(cell, formatterParams){
      var value = cell.getValue();
       if(value > 0){
-        return "<a class='btn btn-sm btn-outline-info d-block' href='parts/"+value+"'>View</span>";
+        return "<a class='btn btn-sm btn-outline-dark d-block' href='parts/"+value+"'>View</span>";
       }else{
-        return "<a class='btn btn-sm btn-outline-info disabled d-block' disabled='disabled' href='#'>View</span>";
+        return "<a class='btn btn-sm btn-outline-dark disabled d-block' disabled='disabled' href='#'>View</span>";
       }
     }},
-    {title:"", field:"blank", align:"center", editor: false, width: 80, headerSort:false},
+    //{title:"", field:"blank", align:"center", editor: false, width: 80, headerSort:false},
   ],
   rowFormatter:function(row){
     //row - row component
-
+    
     var data = row.getData();
 
-    if(data.col == "blue"){
-        row.getElement().css({"background-color":"#A6A6DF"});
-    }
+    switch(data.part_color) {
+      @foreach($filaments as $filament)
+        case "{{$filament->filament_name}}": 
+          row.getElement().css(
+            {"background-color":"{{$filament->background_color}}", "color": "{{$filament->text_color}}"}); 
+          break;
+      @endforeach
+    };
   },
   cellEdited:function(cell){
     var change = cell.getRow().getData();

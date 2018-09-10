@@ -33,6 +33,7 @@ class ReportController extends Controller
         $locations = DB::table('locations')->get();
         $printers = DB::table('printers')->where('active', '=', 1)->get();
         $profiles = DB::table('print_profiles')->get();
+        $filaments = DB::table('filaments')->get();
         
         //
         foreach($parts as $part)
@@ -120,6 +121,7 @@ class ReportController extends Controller
 
         return view('pages.reports.print_demand')
           ->with('report', $report)
+          ->with('filaments', $filaments)
           ->with('printers', $printers);
     }
   
@@ -146,6 +148,7 @@ class ReportController extends Controller
       $inventories = DB::table('inventories')->get();
       $bags = DB::table('bags')->get();
       $orders = DB::table('orders')->get();
+      
       
       // Get Inventory IDs
       $initial_id = DB::table('locations')->where('location_name', '=', 'Initial')->first(); $initial_id = $initial_id->id;
@@ -224,9 +227,12 @@ class ReportController extends Controller
           }
         } 
       }
+      
+      $filaments = DB::table('filaments')->get();
      
       return view('pages.reports.filament_usage')
         ->with('colors', $filament_colors)
+        ->with('filaments', $filaments)
         ->with('report', $separated);
     }
   
@@ -240,6 +246,7 @@ class ReportController extends Controller
     {
       // Get total data.
       $parts = DB::table('parts')->get();
+      $filaments = DB::table('filaments')->get();
 
       // Get first transfer.
       $earliest_date = DB::table('transfers')
@@ -339,6 +346,7 @@ class ReportController extends Controller
       
       return view('pages.reports.weekly_scrap')
         ->with('colors', $filament_colors)
+        ->with('filaments', $filaments)
         ->with('report', $report);
     }
     

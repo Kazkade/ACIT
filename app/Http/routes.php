@@ -58,6 +58,9 @@ Route::get('ajax/part_info/{serial}', function($serial) {
 Route::post('orders/upload', 'OrderController@upload');
 Route::get('deliver_order', 'OrderController@deliver');
 
+// Additional Transfer Routes
+Route::get('transfers/reverse/{id}', 'TransfersController@reverse');
+
 // Bag Routes
 Route::post('bags/mark/{id}', 'BagsController@mark');
 Route::post('bags/unmark/{id}', 'BagsController@unmark');
@@ -70,15 +73,24 @@ Route::get('reports/delivery_report', 'ReportController@delivery_report');
 Route::get('reports/filament_usage', 'ReportController@filament_usage');
 Route::get('reports/weekly_scrap', 'ReportController@weekly_scrap');
 Route::get('reports/engine/{query}', 'ReportController@report_engine');
+Route::get('deliveries/all', 'DeliveryController@all');
 
 // Printer Routes
 Route::post('printer/store', 'PrinterController@store');
 Route::post('printer/toggle/{id}', 'PrinterController@toggle');
 Route::post('printer/destroy/{id}', 'PrinterController@destroy');
 
+// Filament Routes
+Route::post('filament/store', 'FilamentController@store');
+Route::post('filament/toggle/{id}', 'FilamentController@toggle');
+Route::post('filament/destroy/{id}', 'FilamentController@destroy');
+
 // Additional Part Routes
 Route::get('/parts/update_or_create/{json}', "PartsController@update_or_create");
 Route::post('part/moratorium/{id}', 'PartsController@moratorium')->name('parts.moratorium');
+
+// Resets
+Route::get('/reset/inventory/{code}', 'DataController@reset_inventory');
 
 // Resource Routes
 Route::resource('parts', 'PartsController');
@@ -90,6 +102,7 @@ Route::resource('users', 'UserController');
 Route::resource('profiles', 'ProfileController');
 Route::resource('overages', 'OverageController');
 Route::resource('configuration', 'ConfigurationController');
+Route::resource('users', 'UserController');
 /*
 |--------------------------------------------------------------------------
 | Application Routes

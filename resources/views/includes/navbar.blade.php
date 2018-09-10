@@ -22,18 +22,19 @@
         <li class="nav-item">
           <a class="nav-link" href="/dashboard">Dashboard</a>
         </li>
-        <!-- Data Entry -->
+        <!-- Operations -->
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Transfers
+            Operations
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
             <a class="dropdown-item" href="/transfers/create?transfer_type=1">Collections</a>
             <a class="dropdown-item" href="/transfers/create?transfer_type=2">Processing</a>
             <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="/deliveries">Delivery</a>
+            <a class="dropdown-item" href="/orders">Orders</a>
             <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="/transfers">All Transfers</a>
+            <a class="dropdown-item" href="/deliveries">Deliveries</a>
+            <a class="dropdown-item" href="/overages">Overages</a>
           </div>
         </li>
         <!-- Data -->
@@ -45,9 +46,9 @@
             <a class="dropdown-item" href="{{route('parts.index')}}">Parts</a>
             @if(Auth::user()->admin == 1)
               <a class="dropdown-item" href="/profiles">Profiles</a>
+              <a class="dropdown-item" href="{{route('locations.index')}}">Locations</a>
               <div class="dropdown-divider"></div>
             @endif
-            <a class="dropdown-item" href="{{route('locations.index')}}">Locations</a>
             <a class="dropdown-item" href="{{route('transfers.index')}}">Transfers</a>
             <a class="dropdown-item" href="/bags">Bags</a>
             @if(Auth::user()->admin == 1)
@@ -65,8 +66,6 @@
             Admin
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-            <a class="dropdown-item disabled" disabled="disabled" href="#">Overrides</a>
-            <div class="dropdown-divider"></div>
             <a class="dropdown-item" href="{{route('configuration.index')}}">Configuration</a>
             <div class="dropdown-divider"></div>
             <a class="dropdown-item" href="/users">Users</a>
@@ -80,11 +79,9 @@
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
             <a class="dropdown-item" href="/reports/print_list">Print List</a>
-            <a class="dropdown-item disabled" disabled="disabled" href="">Delivery Report</a>
+            <a class="dropdown-item" href="/deliveries/all">Delivery Report</a>
             <a class="dropdown-item" href="/reports/filament_usage">Filament Usage Report</a>
             <a class="dropdown-item" href="/reports/weekly_scrap">Weekly Scrap Report</a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item disabled" disabled="disabled" href="">Other Reports</a>
           </div>
         </li>
       </ul>

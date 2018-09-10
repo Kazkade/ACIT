@@ -12,6 +12,7 @@ use App\Transfer;
 use App\Location;
 use App\Inventory;
 use App\Bag;
+use App\User;
 
 //use DB; // For using SQL syntax. Try to stick to Eloquent unless it's absolutely necessary.
 
@@ -35,7 +36,7 @@ class UserController extends Controller
       //dd(DB::getQueryLog());
       
       // Return View
-      return view('pages.deliveries.index')
+      return view('pages.users.index')
         ->with('users', $users);
     }
 
@@ -47,7 +48,7 @@ class UserController extends Controller
     public function create()
     {
         // The creation form is on the sidebar for admins.
-        return view('pages.deliveries.index');
+        return view('pages.users.index');
     }
 
     /**
@@ -58,7 +59,7 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        return redirect("/deliveries")->with('success', 'Part '.$part->part_serial.' Created! '.$deleted_inventories.' were deleted.');
+        return redirect("/users")->with('success', 'Part '.$part->part_serial.' Created! '.$deleted_inventories.' were deleted.');
     }
 
     /**
@@ -70,7 +71,7 @@ class UserController extends Controller
     public function show($id)
     {
       
-        return view('pages.deliveries.show');
+        return view('pages.users.show');
     }
 
     /**
@@ -81,7 +82,7 @@ class UserController extends Controller
      */
     public function edit($id)
     {
-        return view('pages.deliveries.edit');
+        return view('pages.users.edit');
     }
 
     /**
@@ -93,7 +94,7 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        return redirect("/deliveries")->with('success', 'Part Created!');
+        return redirect("/users")->with('success', 'Part Created!');
     }
 
     /**
@@ -104,7 +105,7 @@ class UserController extends Controller
      */
     public function destroy($id)
     {    
-        return redirect()->route('deliveries.index')->with('success', 'Part '.$part->part_serial.' deleted. '.$deleted_inventories.' were deleted.');
+        return redirect()->route('users.index')->with('success', 'Part '.$part->part_serial.' deleted. '.$deleted_inventories.' were deleted.');
 
     }
 }

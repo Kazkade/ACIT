@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use Auth;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
-use App\Location;
-use App\Part;
+use DB;
 use App\Transfer;
+use App\Bag;
+use App\Delivery;
+use App\Overage;
 use App\Inventory;
 
 class DataController extends Controller
@@ -22,74 +25,46 @@ class DataController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function reset_inventory($authorization_code)
     {
-
+      $reset = 1;
+      $codes = DB::table('database_reset_codes')->get();
+      foreach($codes as $code)
+      {
+        if($code == $authorization_code)
+        {
+          $reset = 1;
+        }
+      }
+      
+      if($reset == 1)
+      {
+        $inventories = Inventory::all();
+        foreach($inventories as $inventory)
+        {
+          $inventory->to_total = 0;
+          $inventory->from_total = 0;
+          $inventory->save();
+        }
+        
+        Transfer::truncate();
+        Bag::truncate();
+        Delivery::truncate();
+        Overage::truncate();
+        
+      }
+      else
+      {
+        if(Auth::user()->admin == 0){
+          return redirect('/')->with('error', "You're not an admin.");
+        }
+        else
+        {
+          return redirect('/')->with('error', "The passcode was incorrect.");
+        }
+      }
+      
+      return redirect('/')->with('success', "All inventory entries reset/deleted.");
     }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-
-    }
+  
 }

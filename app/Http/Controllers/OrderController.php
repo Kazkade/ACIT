@@ -321,7 +321,7 @@ class OrderController extends Controller
           $temp_part_serial = "";
           foreach(DB::table('parts')->get() as $part)
           {
-            if(strpos($part->part_serial, $row["product_id/default_code"]) !== false)
+            if(strpos($row["product_id/default_code"], $part->part_serial) !== false)
             {
               // Get temp part serial.
               $temp_part_serial = $part->part_serial;

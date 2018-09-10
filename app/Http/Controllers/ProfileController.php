@@ -32,7 +32,7 @@ class ProfileController extends Controller
       
       $parts = DB::table('parts')
         ->orderBy('part_serial', 'asc')
-        ->paginate(30);
+        ->get();
       $printers = DB::table('printers')->where('active', '=', 1)->get();
       $profiles = DB::table('print_profiles')->get();
       
@@ -133,8 +133,7 @@ class ProfileController extends Controller
           ]);
         }
       
-        return redirect()->back()
-          ->with('part_id', 'Toodaloo')
+        return redirect()->route('profiles.index', ["anchor" => $request->input('part_id')])
           ->with('success', 'Profile updated!');
     }
     

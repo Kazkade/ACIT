@@ -90,7 +90,27 @@ class DeliveryController extends Controller
      */
     public function store(Request $request)
     {
-        return redirect("/deliveries")->with('success', 'Part '.$part->part_serial.' Created! '.$deleted_inventories.' were deleted.');
+        return redirect("/deliveries");
+    }
+  
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function all()
+    {
+      $deliveries = DB::table('deliveries')
+        ->join('users', 'users.id', '=', 'deliveries.user_id')
+        ->join('bags', 'bags.delivery_id', '=', 'deliveries.id')
+        ->select('deliveries.*', 'users.first_name', 'users.last_name', DB::raw('SUM(`bags`.`quantity`) as "total"'))
+        ->get();
+      
+      
+      
+      return view('pages.deliveries.all')
+        ->with('deliveries', $deliveries);
     }
 
     /**
@@ -101,8 +121,23 @@ class DeliveryController extends Controller
      */
     public function show($id)
     {
-      
-        return view('pages.deliveries.show');
+      $report = DB::table('deliveries')
+        ->join('users', 'user.id', '=', 'deliveries.user_id')
+        ->join('bags', 'bags.delivery_id', '=', 'deliveries.id')
+        ->join('parts', 'bags.part_id', '=', 'parts.id')
+        ->join('overages', 'overages.part_id', '=', 'parts.id')
+        ->select(
+          'deliveries.*',
+          DB::raw('`users`.`first_name` +" "+ `users`.`last_name` as "tech"'),
+          'bags.*',
+          'parts.*',
+          'overages.*'
+        )
+        ->where('deliveries.id', '=', $id)
+        ->get();
+        
+      return view('pages.deliveries.show')
+        ->with('report', $report);
     }
 
     /**

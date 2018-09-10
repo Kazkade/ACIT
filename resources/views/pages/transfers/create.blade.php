@@ -51,20 +51,21 @@
                            value="{{Auth::user()->first_name}} {{Auth::user()->last_name}}"
                     >
                     <input hidden name="user_id" value="{{Auth::user()->id}}">
+                    
                   </div>
                 </div>
               </div>
               <div id="qa_row" class="form-row justify-content-center">
-                <div class="col-md-2 mb-3">
-                  <label for="quantity">Quantity</label>
-                  <input class="form-control alert-success" id="quantity" name="quantity" value=0 placeholder="0">
+                <div class="col-md-3 mb-3">
+                  <label for="quantity">Pass</label>
+                  <input class="form-control alert-success" id="quantity" name="quantity" placeholder="Pass">
                 </div>
-                <div class="col-md-2 mb-3">
-                  <label for="fails">Fails</label>
-                  <input class="form-control alert-danger" id="fails" name="fails" value=0 placeholder="-">
+                <div class="col-md-3 mb-3">
+                  <label for="fails">Fail</label>
+                  <input class="form-control alert-danger" id="fails" name="fails" placeholder="Fails">
                   <input hidden id="fail_location_id" value="" name="fail_location_id">
                 </div>
-                <div class="col-md-2 mb-3">
+                <div class="col-md-3 mb-3">
                   <label for="from_location_id">Transfer Form</label>
                   <select class="form-control" readonly name="from_location_id" id="from_location_id">
                     @foreach($locations as $location)
@@ -72,7 +73,7 @@
                     @endforeach
                   </select>
                 </div>
-                <div class="col-md-2 mb-3">
+                <div class="col-md-3 mb-3">
                   <label for="to_location_id">Transfer To</label>
                   <select class="form-control" readonly name="to_location_id" id="to_location_id">
                     @foreach($locations as $location)
@@ -83,25 +84,22 @@
 
               </div>
               <div id="bagging_row" class="form-row justify-content-center">
-
-                <div class="form-row justify-content-center">
-                  <div class="col-md-2 mb-3">
+                  <div class="col-md-3 mb-3">
                     <label for="quantity">Bag Amount</label>
                     <input class="form-control" id="bag_amount" name="bag_amount" value="0" placeholder="Bag Amount">
                   </div>
-                  <div class="col-md-2 mb-3">
+                  <div class="col-md-3 mb-3">
                     <label for="quantity">Before Bags</label>
                     <input class="form-control" readonly id="before_bags" name="before_bags" value=0 placeholder="-">
                   </div>
-                  <div class="col-md-2 mb-3">
+                  <div class="col-md-3 mb-3">
                     <label for="quantity">Created Bags</label>
                     <input class="form-control" readonly id="created_bags" name="created_bags" placeholder="0">
                   </div>
-                  <div class="col-md-2 mb-3">
+                  <div class="col-md-3 mb-3">
                     <label for="quantity">After Bags</label>
                     <input class="form-control" disabled id="after_bags" name="after_bags" placeholder="0">
                   </div>
-                </div>
               </div>
           </div>
           <div class="card-footer">
@@ -110,6 +108,13 @@
           </div>
         </div>
       </form>
+    </div>
+    <div class="col-2"></div>
+  </div>
+  <div class="row my-3">
+    <div class="col-2"></div>
+    <div class="col-8">
+      <div id="report-table"></div>
     </div>
     <div class="col-2"></div>
   </div>
@@ -277,5 +282,38 @@ $(document).ready(function() {
 });
   
 
+</script>
+<script>
+var data = [
+  @foreach($transfers as $row)
+    {
+      "updated_at":"{{date('m/d/y @ H:i', strtotime($row->updated_at))}}",
+      "tech_name": "{{$row->tech_name}}",
+      "part_name": "{{$row->part_name}}",
+      "part_serial": "{{$row->part_serial}}",
+      "quantity": "{{$row->quantity}}",
+      "from_name": "{{$row->from_name}}",
+      "to_name": "{{$row->to_name}}",
+      "reversal": "{{$row->reversal}}",
+    },
+  @endforeach
+];
+  
+$("#report-table").tabulator({
+  layout:"fitColumns", //fit columns to width of table (optional)
+  placeholder:"No transfers to show. :( ",
+  columns:[
+    {title:"Updated", field:"updated_at", align:"center", width: 150, },
+    {title:"Tech", field:"tech_name", align: "left", width: 150},
+    {title:"Name", field:"part_name", align: "left", width: 200},
+    {title:"Serial", field:"part_serial", align:"center", width: 110, },
+    {title:"Quantity", field:"quantity", align:"center", },
+    {title:"From", field:"from_name", align:"center", },
+    {title:"To", field:"to_name", align:"center", },
+    {title:"Reversed", field:"reversal", align:"center", formatter:"tickCross", },
+  ],
+});
+  
+$("#report-table").tabulator("setData",data);
 </script>
 @endsection

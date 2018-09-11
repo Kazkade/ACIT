@@ -129,7 +129,7 @@ class TransfersController extends Controller
         $this->validate($request, [
           'part_serial' => 'required',
           'bag_amount' => 'required',
-          'to_locations_id' => 'required',
+          'to_location_id' => 'required',
           'from_location_id' => 'required',
         ]);
       

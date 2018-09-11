@@ -171,7 +171,7 @@ class OrderController extends Controller
           $overage->quantity = $bag->total;
           $overage->delivery_id = $delivery->id;
           $overage->save();
-          echo "<br> Overage for ".$bag->total." for part with ID ".$bag->part_id." was created.";
+          //echo "<br> Overage for ".$bag->total." for part with ID ".$bag->part_id." was created.";
         }
       }
       
@@ -181,13 +181,13 @@ class OrderController extends Controller
       $bags = DB::table('bags')
         ->where('marked', '=', 1)
         ->where('delivered', '=', 0)
-        ->get();
-      foreach($bags as $bag)
-      {
-        $bag->delivered = 1;
-        $bag->delivery_id = $delivery->id;
-        $bag->delivered_by = Auth::user()->id;
-      }      
+        ->update([
+          'delivered' => 1,
+          'delivery_id' => $delivery->id,
+          'delivered_by' => Auth:: user()->id
+        ]);   
+      
+      return redirect('/deliveries/'.$delivery->id);
 
     }
 

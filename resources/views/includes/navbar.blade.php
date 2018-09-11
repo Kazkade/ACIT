@@ -59,6 +59,18 @@
             @endif
           </div>
         </li>
+        <!-- Reports -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Reports
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+            <a class="dropdown-item" href="/reports/print_list">Print List</a>
+            <a class="dropdown-item" href="/deliveries/all">Delivery Report</a>
+            <a class="dropdown-item" href="/reports/filament_usage">Filament Usage Report</a>
+            <a class="dropdown-item" href="/reports/weekly_scrap">Weekly Scrap Report</a>
+          </div>
+        </li>
         @if(Auth::user()->admin == 1)
         <!-- Admin -->
         <li class="nav-item dropdown">
@@ -72,18 +84,6 @@
           </div>
         </li>
         @endif
-        <!-- Reports -->
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Reports
-          </a>
-          <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-            <a class="dropdown-item" href="/reports/print_list">Print List</a>
-            <a class="dropdown-item" href="/deliveries/all">Delivery Report</a>
-            <a class="dropdown-item" href="/reports/filament_usage">Filament Usage Report</a>
-            <a class="dropdown-item" href="/reports/weekly_scrap">Weekly Scrap Report</a>
-          </div>
-        </li>
       </ul>
       @endif
     </div>

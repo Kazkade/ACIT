@@ -79,9 +79,9 @@
             <div class="input-group mb-3">
               <input type="text" class="form-control" placeholder="Filament Name" name="filament_name" required aria-label="Filament Name" aria-describedby="basic-addon1">
               <input type="text" class="form-control" id="background_picker" aria-describedby="basic-addon1">
-              <input type="text" class="form-control" id="background_color" placeholder="Background Color" name="background_color" required aria-label="Background Color" aria-describedby="basic-addon1">
+              <input type="text" class="form-control" id="background_color" readonly placeholder="Background Color" name="background_color" required aria-label="Background Color" aria-describedby="basic-addon1">
               <input type="text" class="form-control" id="text_picker">
-              <input type="text" class="form-control" id="text_color" placeholder="Text Color" name="text_color" required aria-label="Text Color" aria-describedby="basic-addon1">
+              <input type="text" class="form-control" id="text_color" readonly placeholder="Text Color" name="text_color" required aria-label="Text Color" aria-describedby="basic-addon1">
               <div class="input-group-append">
                 <input type="submit" class="btn btn-outline-primary" value="Add New Filament">
               </div>
@@ -141,6 +141,7 @@
   </div>
 </div>
 <script>
+  
 $("#text_picker").spectrum({
     color: "#fff",
     change: function(color) {

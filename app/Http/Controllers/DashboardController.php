@@ -103,7 +103,7 @@ class DashboardController extends Controller
         
         
         // It it's not null (no value), set the value to 0 as default to avoid errors when sending to the view.
-        for($filaments as $filament)
+        foreach($filaments as $filament)
         {
           foreach($produced as $each)
           {
@@ -114,8 +114,8 @@ class DashboardController extends Controller
         array_push($prod_fil, $per_day);
       }
       
-      echo '<pre>' . json_encode($prod_fil, JSON_PRETTY_PRINT) . '</pre>';
-      die();
+      //echo '<pre>' . json_encode($prod_fil, JSON_PRETTY_PRINT) . '</pre>';
+      //die();
 
 
       

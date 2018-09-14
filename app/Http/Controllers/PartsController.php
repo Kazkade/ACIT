@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 
+use Auth;
 use App\Part;
 use App\Transfer;
 use App\Location;
@@ -254,9 +255,11 @@ class PartsController extends Controller
         });
       
         // Fail Percentage
-        $part->fail_rate = ($fails->to_total - $fails->from_total == 0) ? 0.00 : ($fails->to_total - $fails->from_total == 0) / $passes->from_total;
-        
-        
+        $total_fails = $fails->to_total - $fails->from_total;
+        $part->fail_rate = 0;
+        if($total_fails != 0) {
+          $part->fail_rate = round($total_fails / $passes->from_total, 4);
+        }
       
         // Grams of waste.
         $part->total_waste = $part->part_mass * ($fails->to_total - $fails->from_total);
@@ -271,6 +274,9 @@ class PartsController extends Controller
         $users = DB::table('users')
           ->select('*')
           ->get();
+      
+        $part->bagged = 0;
+        
         // 
         foreach($bags as $bag)
         {
@@ -280,6 +286,7 @@ class PartsController extends Controller
             if($bag->created_by == $user->id)
             {
               $bag->user_name = $user->first_name." ".$user->last_name;
+              $part->bagged += $bag->quantity;
             }
           }
         }       
@@ -352,12 +359,14 @@ class PartsController extends Controller
       {
         if($row->status === 'new')
         {
+          // Create new Part entry.
           $new_entries++;
           $part = new Part();
         }
         
         if($row->status === 'update')
         {
+          // Grab only the part. Don't create inventories or profiles.
           $updated_entries++;
           $part = Part::find($row->id);
         }
@@ -369,6 +378,36 @@ class PartsController extends Controller
         $part->part_cleaned = ($row->part_cleaned === "true") ? 1 : 0;
         $part->part_mass = $row->part_mass;
         $part->save();
+        
+        // If the part is a new part, create other entries.
+        if($row->status === 'new')
+        {
+          $part = DB::table('parts')
+            ->orderBy('id', 'desc')
+            ->first();
+
+          // Create Inventories
+          $locations = DB::table('locations')->get();
+          foreach($locations as $location)
+          {
+            $inventory = new Inventory();
+            $inventory->part_id = $part->id;
+            $inventory->location_id = $location->id;
+            $inventory->save();
+          }
+          
+          // Create Profiles
+          $printers = DB::table('printers')->get();
+          foreach($printers as $printer)
+          {
+            $profile = new PrintProfile();
+            $profile->printer_id = $printer->id;
+            $profile->part_id = $part->id;
+            $profile->active = 0;
+            $profile->save();
+          }
+          
+        }       
       }
       return json_encode($new_entries." new entries and ".$updated_entries." updated entries.");
     }
@@ -414,7 +453,6 @@ class PartsController extends Controller
      */
     public function moratorium($id)
     {
-      
         $part = Part::find($id);
         $part->in_moratorium = ($part->in_moratorium == 0) ? 1 : 0;
         $part->save();
@@ -429,36 +467,18 @@ class PartsController extends Controller
      */
     public function destroy($id)
     {    
-        $locations = Location::all();
-        $profiles = PrintProfile::all();
-        
-        $part = Part::find($id);
-        $deleted_inventories = 0;
-        $deleted_profiles = 0;
-        
-        foreach($locations as $location)
-        {
-          $inventory = Inventory::where([
-            ['part_id', '=', $part->id],
-            ['location_id', '=', $location->id]
-          ]);
-          Inventory::destroy($inventory->id);
-          $deleted_inventories++;
-        }
+      if(Auth::user()->admin != 1) { return redirect()-route('parts.index')->with('error', 'You don\'t have permission to do that.'); }
       
-        foreach($printers as $printer)
-        {
-          $profile = PrintProfile::where([
-            ['part_id', '=', $part->id],
-            ['printer_id', '=', $printer->id]
-          ]);
-          PrintProfile::destroy($profile->id);
-          $deleted_profiles++;
-        }
-        
-        
-        Part::destroy($id);
-        return redirect()->route('parts.index')->with('success', 'Part '.$part->part_serial.' deleted. '.$deleted_inventories.' inventories were deleted. '.$deleted_profiles.' profiles were deleted.');
-
+      // Remove everything.
+      $inventories = DB::table('inventories')->where('part_id', '=', $id)->delete();
+      $profiles = DB::table('print_profiles')->where('part_id', '=', $id)->delete();
+      $bags = DB::table('bags')->where('part_id', '=', $id)->delete();
+      $overages = DB::table('overages')->where('part_id', '=', $id)->delete();
+      $orders = DB::table('orders')->where('part_id', '=', $id)->delete();
+      $transfers = DB::table('transfers')->where('part_id', '=', $id)->delete();
+      // Destroy Part.
+      Part::destroy($id);
+      
+      return redirect()->route('parts.index')->with('success', 'All traces of that part have been erased.');
     }
 }

@@ -25,15 +25,7 @@
             <div class="form-group">
               <div class="form-check">
                 <input class="form-check-input" checked="checked" type="checkbox" id="default_checkbox" name="location_default" value="option1" aria-label="...">
-                <label class="form-check-label" for="default_checkbox">Default Access?</label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="special_checkbox" name="location_special" aria-label="...">
-                <label class="form-check-label" for="special_checkbox">Special Access?</label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="restricted_checkbox" name="location_restricted" aria-label="...">
-                <label class="form-check-label" for="restricted_checkbox">Restricted Access?</label>
+                <label class="form-check-label" for="default_checkbox">Admin Only?</label>
               </div>
             </div>
           </div>
@@ -54,9 +46,7 @@
             <th scope="col text-center">Updated</th>
             <th scope="col">Name</th>
             <th scope="col text-left">Description</th>
-            <th scope="col">Default</th>
-            <th scope="col">Special</th>
-            <th scope="col">Restricted</th>
+            <th scope="col">Admin Only</th>
             <th scope="col text-center">Total Parts</th>
             <th scope="col text-center">View</th>
           </tr>
@@ -69,22 +59,10 @@
                 <td class="align-middle text-left">{{$location->location_name}}</td>
                 <td class="align-middle text-left">{{$location->location_description}}</td>
                 
-                @if($location->location_default == 0)
-                  <td class="align-middle text-danger">&#10007</td>
-                @else
+                @if($location->admin_only == 1)
                   <td class="align-middle text-success">&#10003</td>
-                @endif
-                
-                @if($location->location_special == 0)
-                  <td class="align-middle text-danger">&#10007</td>
                 @else
-                  <td class="align-middle text-success">&#10003</td>
-                @endif
-                
-                @if($location->location_restricted == 0)
                   <td class="align-middle text-danger">&#10007</td>
-                @else
-                  <td class="align-middle text-success">&#10003</td>
                 @endif
                 
                 <td class="align-middle">0</td>

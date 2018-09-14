@@ -51,11 +51,12 @@
           @if(count($orders) > 0)
             @foreach($orders as $order)
               <tr>
+                <td><a href="parts/{{$order->part_id}}" class="btn btn-sm btn-outline-dark">View Part</a></td>
                 <td>{{$order->part_serial}}</td>
                 <td style="text-align: left !important">{{$order->part_name}}</td>
-                <td>{{$order->quantity}}</td>
+                <td>{{$order->total}}</td>
                 <td>{{$order->filled}}</td>
-                <td>{{$order->quantity - $order->filled}}</td>
+                <td>{{$order->total - $order->filled}}</td>
                 <td>{{$order->tbd}}</td>
                 <td style="text-align: left !important">
                   @foreach($bags as $bag)

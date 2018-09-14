@@ -50,7 +50,7 @@ class TransfersController extends Controller
      */
     public function create()
     {
-      $locations = Location::where('location_default', 1)->get();
+      $locations = Location::all();
       $parts = Part::all();	  
       
       $transfers = DB::table('transfers')

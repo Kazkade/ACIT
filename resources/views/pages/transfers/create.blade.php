@@ -22,7 +22,7 @@
             <div class="form-row">
                 <div class="col-md-4 mb-3">
                   <label for="part_name">Part Name</label>
-                  <input type="text" class="form-control" readonly id="part_name" placeholder="Part Name" required>
+                  <input type="text" class="form-control disabled" disabled="disabled" id="part_name" placeholder="Part Name" required>
                   <input hidden value="" name="part_id" id="part_id">
                   <input type="hidden" name="_token" value="{{ csrf_token() }}">
                 </div>
@@ -45,9 +45,8 @@
                       <span class="input-group-text" id="tech_name">&#9997</span>
                     </div>
                     <input 
-                           type="text" class="form-control" disabled 
-                           id="tech_name" name="tech_name" placeholder="Technician" 
-                           aria-describedby="tech_name" required
+                           type="text" class="form-control disabled"
+                           disabled="disabled" id="tech_name" autocomplete="name"
                            value="{{Auth::user()->first_name}} {{Auth::user()->last_name}}"
                     >
                     <input hidden name="user_id" value="{{Auth::user()->id}}">
@@ -67,7 +66,13 @@
                 </div>
                 <div class="col-md-3 mb-3">
                   <label for="from_location_id">Transfer Form</label>
-                  <select class="form-control" readonly name="from_location_id" id="from_location_id">
+                  <select class="form-control 
+                          @if(Auth::user()->admin == 1)
+                            disabled"
+                            disabled='disabled'
+                          @endif
+                          readonly
+                          name="from_location_id" id="from_location_id">
                     @foreach($locations as $location)
                       <option value="{{$location->id}}" loc_name="$location->location_name">{{$location->location_name}}</option>
                     @endforeach
@@ -75,7 +80,13 @@
                 </div>
                 <div class="col-md-3 mb-3">
                   <label for="to_location_id">Transfer To</label>
-                  <select class="form-control" readonly name="to_location_id" id="to_location_id">
+                  <select class="form-control
+                         @if(Auth::user()->admin == 1)
+                            disabled"
+                            disabled='disabled'
+                          @endif
+                          readonly
+                          name="to_location_id" id="to_location_id">
                     @foreach($locations as $location)
                       <option value="{{$location->id}}" loc_name="$location->location_name">{{$location->location_name}}</option>
                     @endforeach
@@ -295,6 +306,7 @@ var data = [
       "from_name": "{{$row->from_name}}",
       "to_name": "{{$row->to_name}}",
       "reversal": "{{$row->reversal}}",
+      "id": "{{$row->part_id}}",
     },
   @endforeach
 ];
@@ -311,9 +323,24 @@ $("#report-table").tabulator({
     {title:"From", field:"from_name", align:"center", },
     {title:"To", field:"to_name", align:"center", },
     {title:"Reversed", field:"reversal", align:"center", formatter:"tickCross", },
+    {title:"View", field:"id", width:100, formatter:function(cell, formatterParams){
+     var value = cell.getValue();
+      if(value > 0){
+        return "<a class='btn btn-sm btn-outline-dark d-block' href='/parts/"+value+"'>View</span>";
+      }else{
+        return "<a class='btn btn-sm btn-outline-dark disabled d-block' disabled='disabled' href='#'>View</span>";
+      }
+    }},
   ],
 });
   
 $("#report-table").tabulator("setData",data);
+  
+$('#submit_button').on('click', function( event ) {
+  event.preventDefault();
+  $('#to_location_id').removeAttr('disabled').removeClass('disabled');
+  $('#from_location_id').removeAttr('disabled').removeClass('disabled');
+  $('#transfer_form').submit();
+});
 </script>
 @endsection

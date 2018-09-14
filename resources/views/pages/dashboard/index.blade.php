@@ -58,31 +58,42 @@ var production_line_chart = new Chart(timelineChart, {
           {
             label: 'Produced Parts',
             data: [
+              {x: 30, y: 40, z: 50, f: 60},
+              {x: 60, y: 90, z: 0, f: 40},
+              {x: 30, y: 40, z: 50, f: 60},
               @foreach($production_by_filament as $produced)
                 @foreach($produced as $each)
-                  {{var_dump($each)}}
+                  
                 @endforeach
               @endforeach
             ],
             backgroundColor: [
-                'rgba(71, 242, 255, .35)',
+              @foreach($filament_by_production as $fbp)
+                @if($fbp->part_color == "Black")
+                  "#000",
+                @else
+                  "{{$fbp->background_color}}",
+                @endif
+              @endforeach
             ],
-            borderColor: [
-                'rgb(60, 150, 200)',
-            ],
-            borderWidth: 2,
+            borderWidth: 5,
             lineTension: 0.15,
-          },
+            options: {
+              scales: {
+                xAxes: [{
+                  stacked: true
+                }],
+                yAxes: [{
+                  stacked: true
+                }]
+              }
+            }
           },
         ]
     },
     options: {
         scales: {
-            xAxes: [{
-                stacked: false
-            }],
             yAxes: [{
-                stacked: false,
                 ticks: {
                     beginAtZero:true
                 }

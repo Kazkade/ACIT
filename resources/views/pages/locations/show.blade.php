@@ -5,6 +5,9 @@
   <div class="card mb-5">
       <div class="card-header">
           <span class="h2 m-2">{{$locations->location_name}}</span>
+          @if($locations->admin_only == 1)
+            <span class="text-danger">(Admin Only)</span>
+          @endif
         <div class="float-right text-right">
           Created: {{$locations->created_at}}
           <br>
@@ -25,31 +28,9 @@
         <h5 class="card-title">Desription: <strong>{{$locations->location_description}}</strong></h5>
         <h5 class="card-title">Total Inventory: <strong>0</strong></h5>
         <br>
-        <h5 class="card-title">Default Access: 
-          @if($locations->location_default == 0)
-            <span class="text-danger">&#10008</span>
-          @else
-            <span class="text-success">&#10004</span>
-          @endif
-        </h5>
-        <h5 class="card-title">Special Access: 
-          @if($locations->location_special == 0)
-            <span class="text-danger">&#10008</span>
-          @else
-            <span class="text-success">&#10004</span>
-          @endif
-        </h5>
-        <h5 class="card-title">Restricted Access:
-          @if($locations->location_restricted == 0)
-            <span class="text-danger">&#10008</span>
-          @else
-            <span class="text-success">&#10004</span>
-          @endif
-        </h5>
-        <br>
         <table class="table table-sm table-highlight table-bordered text-center">
           <thead>
-            <th colspan=8>Inventory Breakdown</th>
+            <th colspan=9>Inventory Breakdown</th>
           </thead>
           <thead>
             <th>View</th>
@@ -87,7 +68,7 @@
                   @endif
                 @endforeach
               @else
-                <td class="text-center" colspan=8>There are no parts in this location.</td>
+                <td class="text-center" colspan=9>There are no parts in this location.</td>
               @endif
           </tbody>
         </table>

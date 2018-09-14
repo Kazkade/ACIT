@@ -67,7 +67,7 @@ $("#report-table").tabulator({
     {title:"Stock", field:"part_stock", align:"center", editor: false},
     {title:"Bags", field:"part_bags", align:"center", editor: false},
     {title:"Total", field:"part_total", align:"center", editor: false},
-    {title:"View", field:"part_view", width:150, formatter:function(cell, formatterParams){
+    {title:"View", field:"part_view", width:100, formatter:function(cell, formatterParams){
      var value = cell.getValue();
       if(value > 0){
         return "<a class='btn btn-sm btn-outline-dark d-block' href='parts/"+value+"'>View</span>";
@@ -143,7 +143,6 @@ $('#save_changes').on('click', function() {
   
 $('#add_new_row').on('click', function() {
   var o = {
-    "id": 0,
     "status":"new", 
     "part_name":"New Part", 
     "part_serial":"XX-XX0000", 

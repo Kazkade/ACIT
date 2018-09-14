@@ -31,8 +31,12 @@
                       <td><strong>{{$part->part_color}}</strong></td>
                     </tr>
                     <tr>
-                      <td>Weight: </td>
-                      <td><strong>{{$part->part_weight}}g</strong></td>
+                      <td>Mass: </td>
+                      <td><strong>{{$part->part_mass}}g</strong></td>
+                    </tr>
+                    <tr>
+                      <td>Waste: </td>
+                      <td><strong>{{$part->part_waste}}g</strong></td>
                     </tr>
                     @if($part->part_cleaned == 0) 
                       <tr>
@@ -70,9 +74,9 @@
                   <tbody>
                     @foreach($bags as $bag)
                       <tr>
-                        <td><a href="{{route('orders.index')}}" id="bag_{{$bag->id}}">&#10070 | {{$bag->quantity}}</a></td>
+                        <td><a href="/bags" class="btn btn-sm btn-outline-info" id="bag_{{$bag->id}}">&#10070 | {{$bag->quantity}}</a></td>
                         <td>{{$bag->user_name}}</td>
-                        <td>{{$bag->updated_on}}</td>
+                        <td>{{$bag->updated_at}}</td>
                       </tr>
                     @endforeach
                   </tbody>
@@ -146,7 +150,7 @@
                       @if($location->location_name == 'Backstock')
                         @foreach($inventories as $inventory)
                           @if($inventory->location_id == $location->id)
-                            {{$inventory->total}}
+                            {{$inventory->total}} ({{$part->bagged}}) 
                           @endif
                         @endforeach
                       @endif

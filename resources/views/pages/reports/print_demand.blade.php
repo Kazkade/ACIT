@@ -12,7 +12,6 @@
     <h3>
       Print List
     </h3>
-    
     <div id="report-table"></div>
   </div>
   <div class="col-1"></div>
@@ -52,7 +51,10 @@ var data = [
     },
   @endforeach
 ];
-
+var color_code = false;
+$("#color_code").on('click', function() {
+  color_code = !color_code;
+});
 $("#report-table").tabulator({
   layout:"fitColumns", //fit columns to width of table (optional)
   initialSort: [
@@ -92,9 +94,8 @@ $("#report-table").tabulator({
   ],
   rowFormatter:function(row){
     //row - row component
-    
+    /*
     var data = row.getData();
-
     switch(data.part_color) {
       @foreach($filaments as $filament)
         case "{{$filament->filament_name}}": 
@@ -103,6 +104,7 @@ $("#report-table").tabulator({
           break;
       @endforeach
     };
+    */
   },
 });
 

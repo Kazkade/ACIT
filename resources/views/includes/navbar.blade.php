@@ -33,7 +33,7 @@
             <div class="dropdown-divider"></div>
             <a class="dropdown-item" href="/orders">Orders</a>
             <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="/deliveries">Deliveries</a>
+            <a class="dropdown-item" href="/deliveries">Delivery Prep</a>
             <a class="dropdown-item" href="/overages">Overages</a>
           </div>
         </li>
@@ -54,7 +54,7 @@
             @if(Auth::user()->admin == 1)
               <div class="dropdown-divider"></div>
               <a class="dropdown-item" href="/orders">Orders</a>
-              <a class="dropdown-item" href="/deliveries">Deliveries</a>
+              <a class="dropdown-item" href="/deliveries/all">Deliveries</a>
               <a class="dropdown-item" href="/overages">Overages</a>
             @endif
           </div>

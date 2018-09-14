@@ -5,14 +5,31 @@
   <div class="row">
     <div class="col-1"></div>
     <div class="col-10">
-      <div class="card">
+      <div class="card mb-5">
           <div class="card-header">
               <span class="h2 m-2">{{$part->part_serial}} ({{$part->part_name}})</span>
             <div class="float-right text-right">
-              Created: {{$part->created_at}}
-              <br>
-              Last Updated: {{$part->updated_at}}
+              Last Updated: {{ date('m-d-Y @ H:i', strtotime($part->updated_at)) }}
             </div>
+          </div>
+          <div class="card-header">
+            <a href="/parts" class="btn btn-outline-primary">Go Back</a>
+            @if(Auth::user()->account_type == 2)
+              <form action="{{ route('parts.destroy' , $part->id)}}" class="float-right mx-2" method="POST">
+                <input name="_method" type="hidden" value="DELETE">
+                {{ csrf_field() }}
+                <button type="submit" class="btn btn-outline-danger ">&#10006 Delete</button>
+              </form>
+              <a href="{{route('parts.edit', $part->id)}}" class="btn btn-outline-info float-right mx-2">Edit</a>
+              <form action="{{ route('parts.moratorium' , $part->id)}}" class="float-right mx-2" method="POST">
+                {{ csrf_field() }}
+                @if($part->in_moratorium == 0)
+                  <button type="submit" class="btn btn-outline-dark">Move to Moratorium</button>
+                @else
+                  <button type="submit" class="btn btn-outline-dark">Move to Production</button>
+                @endif
+              </form>  
+            @endif
           </div>
           <div class="card-body">
             <div class="row">
@@ -111,15 +128,20 @@
               </div>
             </div>
             <br>
-            <table class="table text-center">
+            <table class="table table-striped table-highlight text-center">
               <thead>
-                <th colspan=8>Inventory Breakdown</th>
+                <th colspan=10 class='table-primary'>Part Statistics</th>
               </thead>
-              <thead>
+              <thead class="table-primary">
                 <th class="text-info">Created</th>
                 <th class="text-primary">Processing</th>
                 <th class="text-success">Backstock</th>
                 <th class="text-danger">Failed</th>
+                <th>Ordered</th>
+                <th>Delivered</th>
+                <th>Remaining</th>
+                <th>Fail Rate</th> <!-- Calculation: Failed / Created -->
+                <th>Waste</th> <!-- Calculation: Failed * Weight -->
               </thead>
               <tbody>
                 <tr>
@@ -167,25 +189,7 @@
                       @endif
                     @endforeach
                   </td>
-                </tr>
-              </tbody>
-            </table>
-            <br>
-            <table class="table text-center">
-              <thead>
-                <th colspan=8>Part History</th>
-              </thead>
-              <thead>
-                <th>Ordered</th>
-                <th>Delivered</th>
-                <th>Remaining</th>
-                <th>Fail Rate</th> <!-- Calculation: Failed / Created -->
-                <th>Waste</th> <!-- Calculation: Failed * Weight -->
-              </thead>
-              <!-- Sort through locations and list all inventories and total -->
-              <tbody>
-                <tr>
-                  <td>
+                                    <td>
                     {{$part->ordered}}
                   </td>
                   <td>
@@ -197,28 +201,42 @@
                   <td>{{$part->fail_rate}}%</td>
                   <td>{{$part->total_waste}}g</td><!-- Total Filament Grams wasted -->
                 </tr>
+                
+              </tbody>
+              <thead>
+                <tr>
+                  <th colspan=30 class="table-primary">Transfer History</th>
+                </tr>
+                <tr>
+                  <th colspan=2>Date</th>
+                  <th colspan=2>Tech</th>
+                  <th>Quantity</th>
+                  <th>To</th>
+                  <th>From</th>
+                  <th>Reversed</th>
+                  <th>View</th>
+                </tr>
+              </thead>
+              <tbody>
+                @foreach($transfers as $transfer)
+                  <tr>
+                    <td colspan=2>{{ date('m-d-Y @ H:i', strtotime($transfers->updated_at)) }}</td>
+                    <td colspan=2>{{$transfer->first_name}} {{$transfer->last_name}}</td>
+                    <td>{{$transfer->quantity}}</td>
+                    <td>{{$transfer->from_location_name}}</td>
+                    <td>{{$transfer->to_location_name}}</td>
+                    @if($transfer->reversal == 1)
+                      <td>Yes</td>
+                    @else
+                      <td>No</td>
+                    @endif
+                    <td><a href="/locations/{{$transfer->to_location_id}}" class="btn btn-sm btn-outline-dark">View Location</a></td>
+                  </tr>
+                @endforeach
               </tbody>
             </table>
           </div>
-          <div class="card-footer">
-            <a href="/parts" class="btn btn-outline-primary">Go Back</a>
-            @if(Auth::user()->account_type == 2)
-              <form action="{{ route('parts.destroy' , $part->id)}}" class="float-right mx-2" method="POST">
-                <input name="_method" type="hidden" value="DELETE">
-                {{ csrf_field() }}
-                <button type="submit" class="btn btn-outline-danger ">&#10006 Delete</button>
-              </form>
-              <a href="{{route('parts.edit', $part->id)}}" class="btn btn-outline-info float-right mx-2">Edit</a>
-              <form action="{{ route('parts.moratorium' , $part->id)}}" class="float-right mx-2" method="POST">
-                {{ csrf_field() }}
-                @if($part->in_moratorium == 0)
-                  <button type="submit" class="btn btn-outline-dark">Move to Moratorium</button>
-                @else
-                  <button type="submit" class="btn btn-outline-dark">Move to Production</button>
-                @endif
-              </form>  
-            @endif
-          </div>
+
       </div>
     </div>
   </div>

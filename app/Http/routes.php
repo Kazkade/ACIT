@@ -73,6 +73,8 @@ Route::get('reports/delivery_report', 'ReportController@delivery_report');
 Route::get('reports/filament_usage', 'ReportController@filament_usage');
 Route::get('reports/weekly_scrap', 'ReportController@weekly_scrap');
 Route::get('reports/engine/{query}', 'ReportController@report_engine');
+
+// Delivery Routes
 Route::get('deliveries/all', 'DeliveryController@all');
 
 // Printer Routes

@@ -323,11 +323,22 @@ class PartsController extends Controller
             }
         }
       
+        $transfers = DB::table('transfers')
+          ->join('users', 'users.id', '=', 'transfers.user_id')
+          ->join('locations as to', 'to.id', '=', 'transfers.to_location_id')
+          ->join('locations as from', 'from.id', '=', 'transfers.from_location_id')
+          ->select('from.location_name as from_location_name', 'to.location_name as to_location_name',
+                   'from.*', 'to.*', 'transfers.*', 'users.first_name', 'users.last_name')
+          ->where('part_id', '=', $part->id)
+          ->take(100)
+          ->get();
+      
         return view('pages.parts.show')
           ->with('inventories', $inventories)
           ->with('locations', $locations)
           ->with('bags', $bags)
           ->with('part', $part)
+          ->with('transfers', $transfers)
           ->with('printers', $printers);
     }
 

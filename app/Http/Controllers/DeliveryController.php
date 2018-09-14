@@ -104,10 +104,8 @@ class DeliveryController extends Controller
       $deliveries = DB::table('deliveries')
         ->join('users', 'users.id', '=', 'deliveries.user_id')
         ->join('bags', 'bags.delivery_id', '=', 'deliveries.id')
-        ->select('deliveries.*', 'users.first_name', 'users.last_name', DB::raw('SUM(`bags`.`quantity`) as "total"'))
+        ->select('deliveries.*', 'users.id', 'users.first_name', 'users.last_name', DB::raw('SUM(`bags`.`quantity`) as "total"'))
         ->get();
-      
-      
       
       return view('pages.deliveries.all')
         ->with('deliveries', $deliveries);
@@ -121,22 +119,37 @@ class DeliveryController extends Controller
      */
     public function show($id)
     {
-      $report = DB::table('deliveries')
-        ->join('users', 'user.id', '=', 'deliveries.user_id')
-        ->join('bags', 'bags.delivery_id', '=', 'deliveries.id')
+      DB::enableQueryLog();
+      
+      $delivery = DB::table('deliveries')
+        ->join('users', 'users.id', '=', 'deliveries.user_id')
+        ->select('deliveries.*', DB::raw('date(deliveries.updated_at) as "date"'), 'users.id', 'users.first_name', 'users.last_name')
+        ->where('deliveries.id', '=', $id)
+        ->first();
+      
+      $report = DB::table('bags')
+        ->join('deliveries', 'deliveries.id', '=',  'bags.delivery_id')
+        ->join('users', 'users.id', '=', 'bags.created_by')
         ->join('parts', 'bags.part_id', '=', 'parts.id')
         ->join('overages', 'overages.part_id', '=', 'parts.id')
         ->select(
           'deliveries.*',
-          DB::raw('`users`.`first_name` +" "+ `users`.`last_name` as "tech"'),
+          'users.id',
+          'users.first_name',
+          'users.last_name',
           'bags.*',
           'parts.*',
           'overages.*'
         )
-        ->where('deliveries.id', '=', $id)
+        ->where('bags.delivery_id', '=', $id)
         ->get();
-        
+      
+      //print_r($report);
+      //echo "<br>";
+      //dd(DB::getQueryLog());
+      
       return view('pages.deliveries.show')
+        ->with('delivery', $delivery)
         ->with('report', $report);
     }
 

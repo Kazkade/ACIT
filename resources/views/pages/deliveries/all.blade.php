@@ -25,10 +25,10 @@
             @foreach($deliveries as $delivery)
               @if($delivery->updated_at > 0)
               <tr>
-                <td>{{$delivery->updated_at}}</td>
+                <td>{{date( 'm-d-Y @ h:i', strtotime($delivery->updated_at))}}</td>
                 <td>{{$delivery->first_name}} {{$delivery->last_name}}</td>
                 <td>{{$delivery->total}}</td>
-                <td><a href="/delivery/show/{{$delivery->id}}" class="btn btn-sm btn-outline-dark">View</a></td>
+                <td><a href="/deliveries/{{$delivery->id}}" class="btn btn-sm btn-outline-dark">View</a></td>
               </tr>
               @endif
             @endforeach

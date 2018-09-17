@@ -340,6 +340,9 @@ $('#submit_button').on('click', function( event ) {
   event.preventDefault();
   $('#to_location_id').removeAttr('disabled').removeClass('disabled');
   $('#from_location_id').removeAttr('disabled').removeClass('disabled');
+  // Force 0s where Pass and Fail amounts are empty.
+  if($('#fails').val() == "") { $('#fails').val(0); }
+  if($('#quantity').val() == "") { $('#quantity').val(0); }
   $('#transfer_form').submit();
 });
 </script>

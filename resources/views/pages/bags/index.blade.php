@@ -10,7 +10,7 @@
         Bags
       </h3>
       @if(count($bags) > 0)
-        <table class="table table-sm table-hover">
+        <table class="table table-sm text-center table-hover">
           <thead>
             <tr>
               <th class="alert-danger" colspan=12>Undelivered Bags</th>
@@ -58,7 +58,7 @@
             @if($bag->delivered == 1)
               <tbody>
 
-                    <tr>
+                    <tr >
                       <td>{{$bag->part_name}}</td>
                       <td>{{$bag->part_serial}}</td>
                       @foreach($users as $user)
@@ -67,7 +67,7 @@
                         @endif
                       @endforeach
                       @foreach($users as $user)
-                        @if($bag->delivered == $user->id)
+                        @if($bag->delivered_by == $user->id)
                           <td>{{$user->first_name}} {{$user->last_name}}</td>
                         @endif
                       @endforeach                      

@@ -31,6 +31,7 @@
 <script>
 // Production Chart
 var timelineChart = document.getElementById("production_line_chart");
+timelineChart.height = 500;
 var production_line_chart = new Chart(timelineChart, {
     type: 'line',
     data: {
@@ -39,67 +40,45 @@ var production_line_chart = new Chart(timelineChart, {
             "{{$day}}",
           @endforeach
         ],
-        datasets: [{
-            label: 'Produced Parts',
-            data: [
-              @foreach($production as $produced)
-                {{$produced}},
-              @endforeach
-            ],
-            backgroundColor: [
-                'rgba(71, 242, 255, .35)',
-            ],
-            borderColor: [
-                'rgb(60, 150, 200)',
-            ],
-            borderWidth: 2,
-            lineTension: 0.15,
-          },
+        datasets: [
+          @foreach($filaments as $filament)
           {
-            label: 'Produced Parts',
+            @if($filament->filament_name == "Black")
+              backgroundColor: '#000',
+            @else
+              backgroundColor: '{{$filament->background_color}}',
+            @endif
             data: [
-              {x: 30, y: 40, z: 50, f: 60},
-              {x: 60, y: 90, z: 0, f: 40},
-              {x: 30, y: 40, z: 50, f: 60},
-              @foreach($production_by_filament as $produced)
-                @foreach($produced as $each)
-                  
-                @endforeach
-              @endforeach
+              @foreach($filament->production as $prod)  {{$prod->total}}, @endforeach
             ],
-            backgroundColor: [
-              @foreach($filament_by_production as $fbp)
-                @if($fbp->part_color == "Black")
-                  "#000",
-                @else
-                  "{{$fbp->background_color}}",
-                @endif
-              @endforeach
-            ],
-            borderWidth: 5,
-            lineTension: 0.15,
-            options: {
-              scales: {
-                xAxes: [{
-                  stacked: true
-                }],
-                yAxes: [{
-                  stacked: true
-                }]
-              }
-            }
+            label: '{{$filament->filament_name}}',
+            fill: true
           },
-        ]
+          @endforeach
+        ], 
     },
     options: {
-        scales: {
-            yAxes: [{
-                ticks: {
-                    beginAtZero:true
-                }
-            }]
-        }
-    }
+			maintainAspectRatio: false,
+			spanGaps: false,
+			elements: {
+				line: {
+					tension: 0.000001
+				}
+			},
+			scales: {
+				yAxes: [{
+					stacked: true
+				}]
+			},
+			plugins: {
+				filler: {
+					propagate: false
+				},
+				'samples-filler-analyser': {
+					target: 'chart-analyser'
+				}
+			}
+		}
 });
 </script>
 <script>

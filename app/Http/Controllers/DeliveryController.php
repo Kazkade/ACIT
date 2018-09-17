@@ -37,7 +37,8 @@ class DeliveryController extends Controller
       
       // Get All Orders
       $orders = DB::table('orders')
-        ->select(DB::raw('`updated_at`, MAX(`priority`) as "priority", `part_id`, SUM(`quantity`) as "ordered"'))
+        ->select(DB::raw('`created_at`, MAX(`priority`) as "priority", `part_id`, SUM(`quantity`) as "ordered"'))
+        ->where(DB::raw('`quantity` - `filled`'), '>', '0')
         ->groupBy('part_id')
         ->get();
       
@@ -69,29 +70,6 @@ class DeliveryController extends Controller
         ->with('users', $users)
         ->with('parts', $parts);
     }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        // The creation form is on the sidebar for admins.
-        return view('pages.deliveries.index');
-    }
-
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        return redirect("/deliveries");
-    }
   
     /**
      * Display the specified resource.
@@ -104,7 +82,8 @@ class DeliveryController extends Controller
       $deliveries = DB::table('deliveries')
         ->join('users', 'users.id', '=', 'deliveries.user_id')
         ->join('bags', 'bags.delivery_id', '=', 'deliveries.id')
-        ->select('deliveries.*', 'users.id', 'users.first_name', 'users.last_name', DB::raw('SUM(`bags`.`quantity`) as "total"'))
+        ->select('deliveries.*', 'users.id as "user_id', 'users.first_name', 'users.last_name', DB::raw('SUM(`bags`.`quantity`) as "total"'))
+        ->groupBy('deliveries.id')
         ->get();
       
       return view('pages.deliveries.all')
@@ -131,17 +110,20 @@ class DeliveryController extends Controller
         ->join('deliveries', 'deliveries.id', '=',  'bags.delivery_id')
         ->join('users', 'users.id', '=', 'bags.created_by')
         ->join('parts', 'bags.part_id', '=', 'parts.id')
-        ->join('overages', 'overages.part_id', '=', 'parts.id')
         ->select(
           'deliveries.*',
-          'users.id',
+          'users.id as "user_id"',
           'users.first_name',
           'users.last_name',
           'bags.*',
-          'parts.*',
-          'overages.*'
+          'parts.*'
         )
+        ->groupBy('bags.id')
         ->where('bags.delivery_id', '=', $id)
+        ->get();
+      
+      $overages = DB::table('overages')
+        ->where('delivery_id', '=', $id)
         ->get();
       
       //print_r($report);
@@ -151,41 +133,6 @@ class DeliveryController extends Controller
       return view('pages.deliveries.show')
         ->with('delivery', $delivery)
         ->with('report', $report);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        return view('pages.deliveries.edit');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        return redirect("/deliveries")->with('success', 'Part Created!');
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {    
-        return redirect()->route('deliveries.index')->with('success', 'Part '.$part->part_serial.' deleted. '.$deleted_inventories.' were deleted.');
-
     }
 }
 

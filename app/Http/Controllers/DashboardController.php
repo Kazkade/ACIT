@@ -64,28 +64,41 @@ class DashboardController extends Controller
       # Production Data
       #########################################################################
       // Initialize Array.
-      $production = array();
-      // Get the sum of all transfers in the last X days in SQL_Days (from before).
-      foreach($sql_days as $day)
+      
+      $production = DB::table('transfers')
+      ->join('parts', 'parts.id', '=', 'transfers.part_id')
+      ->select(DB::raw('SUM(`transfers`.`quantity`) as "total"'), 'parts.part_color', DB::raw('DATEDIFF(CURDATE(), `transfers`.`updated_at`) as "day"'))
+      ->where('transfers.from_location_id', '=', $collections_id)
+      ->groupBy('day', 'parts.part_color')
+      ->take(30)
+      ->get();
+      
+      //print('<pre>'.print_r($production, true).'</pre>');
+      
+      foreach($filaments as $filament)
       {
-        $produced = DB::table('transfers')
-          ->select(DB::raw('SUM(`quantity`) as "total"'))
-          ->where('updated_at', 'like', '%'.$day.'%')
-          ->where('from_location_id', '=', $collections_id)
-          ->first();
-        // It it's not null (no value), set the value to 0 as default to avoid errors when sending to the view.
-        if($produced->total == null)
+        for($i = 0; $i < count($days); $i++)
         {
-          $produced->total = 0;
+          $filament->production[$i] = (object) array('day' => $i, 'total' => 0);
+          foreach($production as $prod)
+          {
+            if($prod->part_color == $filament->filament_name && $prod->day == $i)
+            {
+              $filament->production[$i] = $prod;
+            }
+          }
         }
-        // Push that production value to the array.
-        array_push($production, $produced->total);
         
-
+        $filament->production = array_reverse($filament->production);
       }
+        
+      //print('<pre>'.print_r($filaments, true).'</pre>');
+      //print_r($filaments);
+      //echo "<br>";
+      //dd(DB::getQueryLog());
       
       #########################################################################
-      # Production Data Fileted by Filament
+      # Production Data Filtered by Filament
       #########################################################################
       // Initialize Array.
       $prod_fil = array();
@@ -154,32 +167,13 @@ class DashboardController extends Controller
       #########################################################################
       # Return
       /*-----------------------------------------------------------------------
-      # This returns several objects to the Dashboard view. Objects are:
-      # $filament_by_production
-        ->total // Total value of parts produced in that filament.
-        ->part_color // Filament color for that part.
-        ->background_color // Hex color used for UI purposes. Black is always #000
-        
-        $filaments
-        ->all() // Returns all of the fields from the filaments table.
-        
-        $messages
-        ->alert_type // For the Bootstrap Alert div class. Default is Danger.
-        ->header // Header used on the Bootstrap card.
-        ->message // Message displayed in the body of the card.
-        ->link // Link to where to resolve the issue.
-        
-        $days // Pure array of strings.
-        
-        $production // Pure Array of integers.
-      */
-      #########################################################################
+      # This returns several objects to the Dashboard view.
+      */#######################################################################
       return view('pages.dashboard.index')
         ->with('filament_by_production', $filament_by_production)
         ->with('filaments', $filaments)
         ->with('messages', $messages)
         ->with('days', array_reverse($days))
-        ->with('production', array_reverse($production))
         ->with('production_by_filament', $prod_fil);
     }
   

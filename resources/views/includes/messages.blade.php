@@ -23,3 +23,19 @@
     </div>
   </div>
 @endif
+
+@if(session('info'))
+  <div class="container">
+    <div class="alert alert-info alert-dismissible fade show">
+      {{session('error')}}  
+    </div>
+  </div>
+@endif
+
+@if(session('warning'))
+  <div class="container">
+    <div class="alert alert-warning alert-dismissible fade show">
+      {{session('error')}}  
+    </div>
+  </div>
+@endif

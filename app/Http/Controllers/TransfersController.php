@@ -133,6 +133,29 @@ class TransfersController extends Controller
           'from_location_id' => 'required',
         ]);
       
+        $part = DB::table('parts')
+          ->where('id', '=', $request->part_id)
+          ->first();
+        
+        if(
+          $request->input('bag_amount') <= 0 && 
+          $part->part_cleaned == 0 &&
+          $request->transfer_type == 1
+        )
+        {
+          return redirect()->route('transfers.create', ['transfer_type' => $request->transfer_type])
+          ->with('success','Bagging amount can\'t be 0.');
+        }
+      
+        if(
+          $request->input('bag_amount') <= 0 && 
+          $request->transfer_type == 2
+        )
+        {
+          return redirect()->route('transfers.create', ['transfer_type' => $request->transfer_type])
+          ->with('success','Bagging amount can\'t be 0.');
+        }
+      
         // Create Part
         $pass_transfer = new Transfer;
         $pass_transfer->part_id = $request->input('part_id');
@@ -202,8 +225,17 @@ class TransfersController extends Controller
           $fail_transfer->save();
         }
         
-        return redirect()->route('transfers.create', ['transfer_type' => $request->transfer_type])
+        if($part->part_cleaned == 1)
+        {
+          return redirect()->route('transfers.create', ['transfer_type' => $request->transfer_type])
+          ->with('success','Transfer recorded!');
+        }
+        else 
+        {
+          return redirect()->route('transfers.create', ['transfer_type' => $request->transfer_type])
           ->with('success','Transfer Recorded! '.$request->input('created_bags').' bag(s) created.');
+        }
+        
         
     }
 

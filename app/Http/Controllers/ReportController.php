@@ -28,6 +28,7 @@ class ReportController extends Controller
         $orders = DB::table('orders')
           ->select('*', DB::raw('SUM(`orders`.`quantity`) as "total"'))
           ->groupBy('part_id')
+          ->where('closed', '=', 0)
           ->get(); // The variables are actually reversed in the query creator. So > instead of <.
         //die(var_dump($orders));
         $inventories = DB::table('inventories')->get();
@@ -56,7 +57,7 @@ class ReportController extends Controller
                   case 0: $part->priority = "Low"; break;
                   case 1: $part->priority = "Mid"; break;
                   case 2: $part->priority = "High"; break;
-                  default: $part->priority = "High"; break;
+                  default: $part->priority = "Low"; break;
                 }
                 $part->on_order = $order->total;
                 $part->remaining += ($order->total - $order->filled);

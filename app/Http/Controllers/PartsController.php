@@ -368,6 +368,7 @@ class PartsController extends Controller
       
       foreach($var as $row)
       {
+        
         if($row->status === 'new')
         {
           // Create new Part entry.
@@ -387,7 +388,9 @@ class PartsController extends Controller
         $part->part_version = $row->part_version;
         $part->part_color = $row->part_color;
         $part->part_cleaned = ($row->part_cleaned === "true") ? 1 : 0;
+        $part->recommended_bagging = $row->recommended_bagging;
         $part->part_mass = $row->part_mass;
+        $part->part_waste = $row->part_waste;
         $part->save();
         
         // If the part is a new part, create other entries.

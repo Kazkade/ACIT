@@ -37,7 +37,7 @@
                 @else
                   <tr style="background-color: #b9f6ca;">
                 @endif 
-                <td>{{$order->updated_at}}</td>
+                <td>{{$order->created_at}}</td>
                 @foreach($parts as $part)
                   @if($part->id == $order->part_id)
                     <td style="text-align: left !important">{{$part->part_name}}</td>
@@ -83,7 +83,7 @@
                 @else
                   <tr style="background-color: #b9f6ca;">
                 @endif 
-                <td>{{$order->updated_at}}</td>
+                <td>{{$order->created_at}}</td>
                 @foreach($parts as $part)
                   @if($part->id == $order->part_id)
                     <td style="text-align: left !important">{{$part->part_name}}</td>

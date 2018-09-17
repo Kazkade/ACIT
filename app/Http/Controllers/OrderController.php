@@ -36,9 +36,21 @@ class OrderController extends Controller
         ->join('parts', 'orders.part_id', '=', 'parts.id')
         ->select('orders.*', 'parts.part_name', 'parts.part_serial', DB::raw('SUM(`orders`.`quantity`) as "total"'))
         ->groupBy('parts.id')
-        ->where('orders.quantity', '>', 'orders.filled')
+        ->where('closed', '=', 0)
         ->get();
       
+      $closed = DB::table('orders')
+        ->join('parts', 'parts.id', '=', 'orders.part_id')
+        ->select('orders.id', 'orders.mo', 'orders.updated_at', 'orders.quantity', 'parts.part_serial', 'parts.part_name', 'orders.part_id', 'orders.priority')
+        ->orderBy('mo', 'asc')
+        ->where('closed', '=', 1)
+        ->get();
+      
+      $mos = DB::table('orders')
+        ->select('orders.id', 'orders.mo', 'orders.quantity', 'orders.part_id', 'orders.priority')
+        ->where('closed', '=', 0)
+        ->orderBy('mo', 'asc')
+        ->get();
       
       $bags = DB::table('bags')
         ->select('*')
@@ -46,17 +58,28 @@ class OrderController extends Controller
         ->where('marked', '=', 1)
         ->get();
       
-      foreach($orders as $order)
+      // For Open Orders
+      if(count($orders) > 0)
       {
-        $order->tbd = 0;
-        foreach($bags as $bag)
+        foreach($orders as $order)
         {
-          if($order->part_id == $bag->part_id)
+          $order->tbd = 0;
+          $order->mos = array();
+          foreach($bags as $bag)
           {
-            $order->tbd += $bag->quantity;
+            if($order->part_id == $bag->part_id)
+            {
+              $order->tbd += $bag->quantity;
+            }
+          }
+          foreach($mos as $mo)
+          {
+            if($mo->part_id == $order->part_id)
+            {
+              array_push($order->mos, $mo);
+            }
           }
         }
-        
       }
       
       //die(json_encode($orders));
@@ -81,6 +104,7 @@ class OrderController extends Controller
       
       return view('pages.orders.index')
         ->with('orders', $orders)
+        ->with('closed', $closed)
         ->with('bags', $bags)
         ->with('users', $users);
     }
@@ -199,7 +223,43 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
-        //
+      //
+        $this->validate($request, [
+          'mo' => 'required',
+          'part_serial' => 'required',
+          'quantity' => 'required',
+          'priority' => 'required',
+        ]);  
+      
+        // Check against current MOs
+        $order = DB::table('orders')
+          ->where('mo', '=', "MO/".$request->input('mo'))
+          ->first();
+      
+        if($order != null)
+        {
+          return redirect()->route('orders.index')->with('error', 'That MO already exists.');
+        }
+      
+        // Get Part
+        $part = DB::table('parts')
+          ->where('part_serial', '=', $request->input('part_serial'))
+          ->first();
+      
+        // Check if part exists.
+        if($part == null)
+        {
+          return redirect()->route('orders.index')->with('error', 'That part doesn\'t exist.');
+        }
+      
+        $order = new Order();
+        $order->mo = "MO/".$request->input('mo');
+        $order->quantity = (int)$request->input("quantity");
+        $order->priority = $request->input('priority');
+        $order->part_id = $part->id;
+        $order->save();
+      
+        return redirect()->route('orders.index')->with('success', "Order Created!");
         
     }
 
@@ -246,7 +306,16 @@ class OrderController extends Controller
      */
     public function destroy($id)
     {    
-        return redirect()->route('orders.index')->with('success', 'Part '.$part->part_serial.' deleted. '.$deleted_inventories.' were deleted.');
+      
+      $order = DB::table('orders')
+        ->join('parts', 'parts.id', '=', 'orders.part_id')
+        ->select('parts.part_name', 'orders.*')
+        ->where('orders.id', '=', $id)
+        ->first();
+      
+      Order::destroy($id);
+      
+      return redirect()->route('orders.index')->with('success', 'Order '.$order->mo.' for '.$order->quantity.' '.$order->part_name.' was deleted.');
 
     }
   

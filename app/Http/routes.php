@@ -87,9 +87,14 @@ Route::post('filament/store', 'FilamentController@store');
 Route::post('filament/toggle/{id}', 'FilamentController@toggle');
 Route::post('filament/destroy/{id}', 'FilamentController@destroy');
 
-// Additional Part Routes
+// Part Routes
 Route::get('/parts/update_or_create/{json}', "PartsController@update_or_create");
 Route::post('part/moratorium/{id}', 'PartsController@moratorium')->name('parts.moratorium');
+
+// Order Routes
+Route::post('/orders/store', [
+  "uses" => 'OrderController@store'
+]);
 
 // Resets
 Route::get('/reset/inventory/{code}', 'DataController@reset_inventory');

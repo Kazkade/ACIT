@@ -2,8 +2,7 @@
 @section('content')
 <div class="container-fluid">
   <div class="row">
-    <div class="col-1"></div>
-    <div class="col-10 ">
+    <div class="col-12 ">
       <h3>
         Parts
       </h3>
@@ -32,7 +31,7 @@ var data = [
       "part_color": "{{$row->part_color}}",
       "part_version": "{{$row->part_version}}",
       "part_cleaned": "{{$row->part_cleaned}}",
-      "part_bagging": "{{$row->recommended_bagging}}",
+      "recommended_bagging": "{{$row->recommended_bagging}}",
       "part_mass": "{{$row->part_mass}}",
       "part_waste": "{{$row->part_waste}}",
       "part_stock": "{{$row->inventory}}",
@@ -55,17 +54,17 @@ $("#report-table").tabulator({
   columns:[
     {title:"ID", field:"id", align:"center", visible: false, editor: false},
     {title:"Status", field:"status", align:"center", visible: false, editor: false},
-    {title:"Updated", field:"updated_at", align:"center", width: 150, editor: false},
-    {title:"Name", field:"part_name", download: false, align: "left", editor: editable, width: 250},
-    {title:"Serial", field:"part_serial", align:"center", width: 110, editor: editable},
+    {title:"Updated", field:"updated_at", align:"center", width: 180, editor: false},
+    {title:"Name", field:"part_name", download: false, align: "left", editor: editable, width: 350},
+    {title:"Serial", field:"part_serial", align:"center", width: 150, editor: editable},
     {title:"Color", field:"part_color", align:"center", width: 180, editor:"select", editorParams:{
       @foreach($filaments as $filament)
         "{{$filament->filament_name}}":"{{$filament->filament_name}}",
       @endforeach
     }},
-    {title:"Version", field:"part_version", align:"center", editor: editable},
+    {title:"Version", field:"part_version", align:"center", editor: false, visible: false},
     {title:"Cleaned", field:"part_cleaned", align:"center", formatter:"tickCross", editor: editable},
-    {title:"Bagging", field:"part_bagging", align:"center", editor: editable},
+    {title:"Bagging", field:"recommended_bagging", align:"center", editor: editable},
     {title:"Mass", field:"part_mass", align:"center", editor: editable},
     {title:"Waste", field:"part_waste", align:"center", editor: editable},
     {title:"Stock", field:"part_stock", align:"center", editor: false},
@@ -124,9 +123,11 @@ $('#save_changes').on('click', function() {
         "part_color": $tds.eq(5).text(),
         "part_version": $tds.eq(6).text(),
         "part_cleaned": $tds.eq(7).attr("aria-checked"),
-        "part_mass": $tds.eq(8).text(),
+        "recommended_bagging": $tds.eq(8).text(),
+        "part_mass": $tds.eq(9).text(),
+        "part_waste": $tds.eq(10).text()
       }
-      
+                             
       updatedRows.data.push(ar);
     }
   });
@@ -153,6 +154,8 @@ $('#add_new_row').on('click', function() {
     "part_color": "Black",
     "part_version": "0.0.0",
     "part_mass": 0,
+    "recommended_bagging":100, 
+    "part_waste":0, 
     "part_cleaned":0, 
     "part_stock": 0, 
     "part_bags": 0, 

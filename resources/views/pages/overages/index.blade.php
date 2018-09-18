@@ -29,11 +29,11 @@
                 <td style="text-align: left !important">{{$overage->part_name}}</td>
                 <td>{{$overage->part_serial}}</td>
                 <td>{{$overage->quantity}}</td>
-                <td class="btn btn-sm btn-outline-info" href="/deliveries/{{$overage->delivery_id}}">
-                  View
+                <td>
+                  <a class="btn btn-sm btn-outline-info" href="/deliveries/{{$overage->delivery_id}}">View Delivery</a>
                 </td>
-                <td style="text-align: left !important">
-                  <a href="/overage/resolve/{{$overage->id}}" class="btn btn-sm btn-outline-info">Resolve</a>
+                <td >
+                  <a href="/overages/resolve/{{$overage->overage_id}}" class="btn btn-sm btn-outline-success">Resolve</a>
                 </td>
               </tr>
             @endif
@@ -49,21 +49,22 @@
             <th scope="col">Serial</th>
             <th scope="col">Overage</th>
             <th scope="col">Delivery</th>
+            <th scope="col">Unresolve</th>
           </tr>
         </thead>
         <tbody>
           @foreach($overages as $overage)
-            @if($overage->resolved == 0)
+            @if($overage->resolved == 1)
               <tr>
                 <td class="text-red">Unresolved</td>
                 <td style="text-align: left !important">{{$overage->part_name}}</td>
                 <td>{{$overage->part_serial}}</td>
                 <td>{{$overage->quantity}}</td>
-                <td class="btn btn-sm btn-outline-info" href="/deliveries/{{$overage->delivery_id}}">
-                  View
+                <td>
+                  <a class="btn btn-sm btn-outline-info" href="/deliveries/{{$overage->delivery_id}}">View Delivery</a>
                 </td>
-                <td style="text-align: left !important">
-                  <a href="/overage/unresolve/{{$overage->id}}" class="btn btn-sm btn-outline-danger">Unresolve</a>
+                <td>
+                  <a href="/overages/unresolve/{{$overage->overage_id}}" class="btn btn-sm btn-outline-danger">Unresolve</a>
                 </td>
               </tr>
             @endif

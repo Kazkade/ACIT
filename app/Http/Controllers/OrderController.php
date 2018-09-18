@@ -162,27 +162,23 @@ class OrderController extends Controller
       
       foreach($bags as $bag)
       {
-        echo "<br>Bag with part id ".$bag->part_id." showing a total of ".$bag->total."<br> \r\n";
         foreach($orders as $order)
         {
           if($bag->part_id == $order->part_id)
           {
-            echo "- Order with MO ".$order->mo." needs ".($order->quantity - $order->filled)."<br> \r\n";
             if($order->quantity - $order->filled > $bag->total)
             {
               $order->filled += $bag->total;
               Order::where('id', $order->id)
                 ->update(['filled' => $bag->total]);
-              echo "All orders for part with id of ".$bag->part_id." have been filled.<br> \r\n";
             }
             else
             {
-              echo "Applying ".($order->quantity - $order->filled)." parts to order.<br>\r\n";
               $bag->total -= $order->quantity - $order->filled;
               $order->filled = $order->quantity;
               
               Order::where('id', $order->id)
-                ->update(['filled' => $order->quantity]);
+                ->update(['filled' => $order->quantity, 'closed' => 1]);
               
             }
           }
@@ -261,41 +257,6 @@ class OrderController extends Controller
       
         return redirect()->route('orders.index')->with('success', "Order Created!");
         
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-      return view('pages.orders.index');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        return view('pages.orders.edit')->with('part', $part);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-        return redirect()->route('orders.index')->with('success', 'Part Created!');
     }
 
     /**

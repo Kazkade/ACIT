@@ -91,28 +91,27 @@ class TransfersController extends Controller
     public function reverse($id)
     {
       // Find Transfer
-      $transfer = Transfer::find($id);
-      // Create Duplicate transfer with reversed locations.
-      $reverse = new Transfer();
-        $reverse->part_id = $transfer->part_id;
-        $reverse->to_location_id = $transfer->to_location_id;
-        $reverse->from_location_id = $transfer->from_location_id;
-        $reverse->quantity = $transfer->quantity;
-      $reverse->user_id = Auth::user()->id;
-      $reverse->reversal = 1;
-      $reverse->save();
-
+      $transfer = DB::table('transfers')
+        ->where('id', '=', $id)
+        ->first();
+      
       // Update From Inventory
       $from_inventory = DB::table('inventories')
-        ->where('part_id', '=', $reverse->part_id)
-        ->where('location_id', '=', $reverse->from_location_id)
-        ->decrement('from_total', $reverse->quantity);
+        ->where('part_id', '=', $transfer->part_id)
+        ->where('location_id', '=', $transfer->from_location_id)
+        ->decrement('from_total', $transfer->quantity);
 
       // Update Pass Inventory
       $reverse_inventory = DB::table('inventories')
-        ->where('part_id', '=', $reverse->part_id)
-        ->where('location_id', '=', $reverse->to_location_id)
-        ->decrement('to_total', $reverse->quantity);
+        ->where('part_id', '=', $transfer->part_id)
+        ->where('location_id', '=', $transfer->to_location_id)
+        ->decrement('to_total', $transfer->quantity);
+      
+      // Update Transfer
+      $transfer = DB::table('transfers')
+        ->where('id', '=', $id)
+        ->update(['reversal' => 1]);
+      
 
       return redirect()->route('transfers.index')
         ->with('success','Transfer reversed!');
@@ -216,11 +215,11 @@ class TransfersController extends Controller
         }
       
         // Save Everything
-        if($pass_transfer->quantity > 0)
+        if($pass_transfer->quantity != 0)
         {
           $pass_transfer->save();
         }
-        if($fail_transfer->quantity > 0)
+        if($fail_transfer->quantity != 0)
         {
           $fail_transfer->save();
         }

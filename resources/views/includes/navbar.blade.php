@@ -46,7 +46,9 @@
             <a class="dropdown-item" href="{{route('parts.index')}}">Parts</a>
             @if(Auth::user()->admin == 1)
               <a class="dropdown-item" href="/profiles">Profiles</a>
-              <a class="dropdown-item" href="{{route('locations.index')}}">Locations</a>
+              @if($config["show_locations"] == 1 || $config["dev_mode"] == 1)
+                <a class="dropdown-item" href="{{route('locations.index')}}">Locations</a>
+              @endif
               <div class="dropdown-divider"></div>
             @endif
             <a class="dropdown-item" href="{{route('transfers.index')}}">Transfers</a>

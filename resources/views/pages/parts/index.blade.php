@@ -20,6 +20,7 @@
 </div>
 
 <script>
+  
 var data = [
   @foreach($parts as $row)
     {

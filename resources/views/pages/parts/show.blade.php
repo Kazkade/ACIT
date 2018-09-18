@@ -93,7 +93,7 @@
                       <tr>
                         <td><a href="/bags" class="btn btn-sm btn-outline-info" id="bag_{{$bag->id}}">&#10070 | {{$bag->quantity}}</a></td>
                         <td>{{$bag->user_name}}</td>
-                        <td>{{$bag->updated_at}}</td>
+                        <td>{{date('m-d-Y @ H:i', strtotime($bag->updated_at))}}</td>
                       </tr>
                     @endforeach
                   </tbody>
@@ -140,6 +140,7 @@
                 <th>Ordered</th>
                 <th>Delivered</th>
                 <th>Remaining</th>
+                <th>Overages</th>
                 <th>Fail Rate</th> <!-- Calculation: Failed / Created -->
                 <th>Waste</th> <!-- Calculation: Failed * Weight -->
               </thead>
@@ -198,6 +199,9 @@
                   <td>
                     {{$part->remaining}}
                   </td>
+                  <td>
+                    {{$part->overages}}
+                  </td>
                   <td>{{$part->fail_rate}}%</td>
                   <td>{{$part->total_waste}}g</td><!-- Total Filament Grams wasted -->
                 </tr>
@@ -214,13 +218,13 @@
                   <th>To</th>
                   <th>From</th>
                   <th>Reversed</th>
-                  <th>View</th>
+                  <th colspan=2>View</th>
                 </tr>
               </thead>
               <tbody>
                 @foreach($transfers as $transfer)
                   <tr>
-                    <td colspan=2>{{ date('m-d-Y @ H:i', strtotime($transfers->updated_at)) }}</td>
+                    <td colspan=2>{{date('m-d-Y @ H:i', strtotime($transfer->updated_at))}}</td>
                     <td colspan=2>{{$transfer->first_name}} {{$transfer->last_name}}</td>
                     <td>{{$transfer->quantity}}</td>
                     <td>{{$transfer->from_location_name}}</td>
@@ -230,7 +234,7 @@
                     @else
                       <td>No</td>
                     @endif
-                    <td><a href="/locations/{{$transfer->to_location_id}}" class="btn btn-sm btn-outline-dark">View Location</a></td>
+                    <td colspan=2><a href="/locations/{{$transfer->to_location_id}}" class="btn btn-sm btn-outline-dark">View Location</a></td>
                   </tr>
                 @endforeach
               </tbody>

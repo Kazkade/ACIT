@@ -72,7 +72,11 @@
                     @endif
                   @endforeach
                 </td>
-                <td><a href="/transfers/reverse/{{$transfer->id}}" class="btn btn-sm btn-outline-secondary d-block">&#8652</a></td>
+                <td>
+                  @if($transfer->reversal == 0)
+                    <a href="/transfers/reverse/{{$transfer->id}}" class="btn btn-sm btn-outline-secondary d-block">&#8652</a>
+                  @endif
+                </td>
               </tr>
             @endforeach 
           @else

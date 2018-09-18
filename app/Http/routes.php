@@ -54,17 +54,20 @@ Route::get('ajax/part_info/{serial}', function($serial) {
 });
 
 
-// Extra Orders Routes
+// Orders Routes
 Route::post('orders/upload', 'OrderController@upload');
 Route::get('deliver_order', 'OrderController@deliver');
+Route::post('/orders/store', [
+  "uses" => 'OrderController@store'
+]);
 
-// Additional Transfer Routes
 Route::get('transfers/reverse/{id}', 'TransfersController@reverse');
 
 // Bag Routes
 Route::post('bags/mark/{id}', 'BagsController@mark');
 Route::post('bags/unmark/{id}', 'BagsController@unmark');
-Route::get('bags/dismantle/{id}', 'BagsController@dismantle');
+Route::get('bags/destroy/{id}', 'BagsController@destroy');
+Route::get('bags/unbag/{id}', 'BagsController@unbag');
 Route::get('bags/', 'BagsController@index');
 
 // Report Routes
@@ -88,16 +91,16 @@ Route::post('filament/toggle/{id}', 'FilamentController@toggle');
 Route::post('filament/destroy/{id}', 'FilamentController@destroy');
 
 // Part Routes
-Route::get('/parts/update_or_create/{json}', "PartsController@update_or_create");
+Route::get('parts/update_or_create/{json}', "PartsController@update_or_create");
 Route::post('part/moratorium/{id}', 'PartsController@moratorium')->name('parts.moratorium');
 
-// Order Routes
-Route::post('/orders/store', [
-  "uses" => 'OrderController@store'
-]);
+// Overage Routes
+Route::get('overages/resolve/{id}', "OverageController@resolve");
+Route::get('overages/unresolve/{id}', "OverageController@unresolve");
 
-// Resets
-Route::get('/reset/inventory/{code}', 'DataController@reset_inventory');
+// Tool Paths
+Route::get('reset/inventory/{code}', 'DataController@reset_inventory');
+Route::get('regenerate', 'DataController@regenerate');
 
 // Resource Routes
 Route::resource('parts', 'PartsController');

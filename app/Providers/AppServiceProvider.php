@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-//use Illuminate\Support\Facades\Schema;
+use DB;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -14,7 +14,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //Schema::defaultStringLength(128);
+        // Using Closure based composers
+        view()->composer('includes.navbar', function ($view) {
+            $config = array();
+            $config_data = DB::table('config')->get();
+            
+            foreach($config_data as $data)
+            {
+              $config[$data->ckey] = $data->value;
+            }
+            $view->config = $config;
+        });
     }
 
     /**

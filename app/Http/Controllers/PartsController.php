@@ -297,8 +297,22 @@ class PartsController extends Controller
           ->where('part_id', '=', $part->id)
           ->first();
       
+        $deliveries_total = DB::table('bags')
+          ->select(DB::raw('SUM(`quantity`) as "total"'))
+          ->where('part_id', '=', $part->id)
+          ->where('delivered', '=', 1)
+          ->groupBy('part_id')
+          ->first();
+      
+        $overages_total = DB::table('overages')
+          ->select(DB::raw('SUM(`quantity`) as "total"'))
+          ->where('part_id', '=', $part->id)
+          ->where('resolved', '=', 0)
+          ->first();
+      
         $part->ordered = $orders->ordered;
-        $part->delivered = $orders->delivered;
+        $part->delivered = $deliveries_total->total;
+        $part->overages = $overages_total->total;
         $part->remaining = $orders->remaining;
         
         // Build Profiles for table.

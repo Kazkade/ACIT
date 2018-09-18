@@ -82,7 +82,15 @@ class DeliveryController extends Controller
       $deliveries = DB::table('deliveries')
         ->join('users', 'users.id', '=', 'deliveries.user_id')
         ->join('bags', 'bags.delivery_id', '=', 'deliveries.id')
-        ->select('deliveries.*', 'users.id as "user_id', 'users.first_name', 'users.last_name', DB::raw('SUM(`bags`.`quantity`) as "total"'))
+        ->join('overages', 'overages.delivery_id', '=', 'deliveries.id')
+        ->select(
+          'deliveries.*', 
+          'users.id as "user_id', 
+          'users.first_name', 
+          'users.last_name', 
+          'overages.quantity'
+          'overages.resolved'
+          DB::raw('SUM(`bags`.`quantity`) as "total"'))
         ->groupBy('deliveries.id')
         ->get();
       
@@ -116,9 +124,10 @@ class DeliveryController extends Controller
           'users.first_name',
           'users.last_name',
           'bags.*',
+          DB::raw('SUM(`bags`.`quantity`) as "quantity"'),
           'parts.*'
         )
-        ->groupBy('bags.id')
+        ->groupBy('bags.part_id')
         ->where('bags.delivery_id', '=', $id)
         ->get();
       

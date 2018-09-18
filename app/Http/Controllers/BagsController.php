@@ -9,6 +9,7 @@ use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use App\Location;
 use App\Part;
+use App\Bag;
 use App\Transfer;
 use App\Inventory;
 
@@ -60,42 +61,6 @@ class BagsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function dismantle($id)
-    {
-      // Get bag with ID
-      $bag = DB::table('bags')
-        ->where('id', '=', $id)
-        ->first();
-      // Get backstock location ID
-      $backstock_id = DB::table('locations')
-        ->where('location_name', '=', "Backstock")
-        ->first();
-      $backstock_id = $backstock_id->id;
-      // Get backstock location ID
-      $bag_location_id = DB::table('locations')
-        ->where('location_name', '=', "Bags")
-        ->first();
-      $bag_location_id = $bag_location_id->id;
-      // Get backstock inventory.
-      $backstock = DB::table('inventories')
-        ->where('location_id', '=', $backstock_id)
-        ->where('part_id', '=', $bag->part_id)
-        ->first();
-      // Adjust inventory and save.
-      $backstock->from_total -= $bag->quantity;
-      $backstock->save();
-      // Delete bag.
-      $bag->delete();
-
-      return redirect()->route('bags.index')
-        ->with('success', 'Bag was dismantled.');
-    }
-  
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
       $users = DB::table('users')
@@ -111,6 +76,79 @@ class BagsController extends Controller
         ->with('users', $users)
         ->with('bags', $bags);
     }
+  
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function unbag($id)
+    {
+      // Get bag from ID
+      $bag = Bag::find($id);
+      // Get backstock ID
+      $backstock = DB::table('locations')->where('location_name', '=', 'Backstock')->first();
+      $backstock_id = $backstock->id;
+      // update Inventory
+      $inventory = DB::table('inventories')
+        ->where('part_id', '=', $bag->part_id)
+        ->where('location_id', '=', $backstock_id)
+        ->increment('to_total', $bag->quantity);
+      
+      Bag::destroy($id);
 
+      return redirect("/bags")
+        ->with('success', 'Parts was unbagged.');
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+      // Get bag with ID
+      $bag = Bag::destroy($id);
+
+      return redirect("/bags")
+        ->with('success', 'Bag was destroyed.');
+    }
+  
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function hand_deliver($id)
+    {
+      // Get bag with ID
+      $bag = Bag::find($id);
+      
+      // Create and complete delivery.
+      $delivery = new Delivery();
+      $delivery->user_id = Auth::user()->id;
+      $delivery->save();
+      $delivery = DB::table('deliveries')
+        ->orderBy('updated_at', 'desc')
+        ->first();
+      
+      // Create & Fill new MO.
+      $new_mo = new Order;
+      $new_mo->part_id = $bag->part_id;
+      $new_mo->mo = "HD/".$bag->id;
+      $new_mo->delivery_id = $delivery->id;
+      $new_mo->quantity = $bag->quantity;
+      $new_mo->filled = $bag->quantity;
+      $new_mo->closed = 1;
+      $new_mo->priority = 0;
+      $new_mo->save();
+      
+      Bag::where('id', '=', $id)
+        ->update(['delivered' => 1, 'delivered_by' => Auth::user()->id]);
+
+      return redirect("/deliveries/all")
+        ->with('success', 'Bag was hand delivered!');
+    }
     
 }

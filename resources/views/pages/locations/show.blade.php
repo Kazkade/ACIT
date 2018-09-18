@@ -16,13 +16,17 @@
         </div>
       </div>
       <div class="card-header">
-        <a href="{{route('locations.index')}}" class="btn btn-primary">Go Back</a>
-        <form action="{{ route('locations.destroy' , $locations->id)}}" class="float-right" method="POST">
-          <a href="{{route('locations.edit', $locations->id)}}" class="btn btn-outline-info">Edit</a>
-            <input name="_method" type="hidden" value="DELETE">
-            {{ csrf_field() }}
-          <button type="submit" class="btn btn-outline-danger ">&#10006 Delete</button>
-        </form>
+        <a href="{{route('locations.index')}}" class="btn btn-primary">All Locations</a>
+        @if($locations->required == 0)
+          <form action="{{ route('locations.destroy' , $locations->id)}}" class="float-right" method="POST">
+            <a href="{{route('locations.edit', $locations->id)}}" class="btn btn-outline-info">Edit</a>
+              <input name="_method" type="hidden" value="DELETE">
+              {{ csrf_field() }}
+            <button type="submit" class="btn btn-outline-danger ">&#10006 Delete</button>
+          </form>
+        @else
+          <button type="submit" class="btn btn-outline-secondary disabled float-right" disabled="disabled">&#10006 Required</button>
+        @endif
       </div>
       <div class="card-body">
         <h5 class="card-title">Desription: <strong>{{$locations->location_description}}</strong></h5>

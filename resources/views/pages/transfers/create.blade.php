@@ -67,9 +67,11 @@
                 <div class="col-md-3 mb-3">
                   <label for="from_location_id">Transfer Form</label>
                   <select class="form-control 
-                          @if(Auth::user()->admin == 1)
+                          @if(Auth::user()->admin == 0)
                             disabled"
                             disabled='disabled'
+                          @else
+                            "
                           @endif
                           readonly
                           name="from_location_id" id="from_location_id">
@@ -81,9 +83,11 @@
                 <div class="col-md-3 mb-3">
                   <label for="to_location_id">Transfer To</label>
                   <select class="form-control
-                         @if(Auth::user()->admin == 1)
+                         @if(Auth::user()->admin == 0)
                             disabled"
                             disabled='disabled'
+                          @else
+                            "
                           @endif
                           readonly
                           name="to_location_id" id="to_location_id">

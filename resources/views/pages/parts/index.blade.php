@@ -6,7 +6,7 @@
       <h3>
         Parts
       </h3>
-      @if(Auth::user()->account_type = 2)
+      @if(Auth::user()->admin = 1)
         <a href="#" id="add_new_row" class="btn btn-outline-primary">❖ Add New Part</a>
         <a href="#" id="save_changes" class="btn btn-outline-success">✔ Save Changes</a>
         <span class="text-success ml-2" id="return-message"></span>

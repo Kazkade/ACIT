@@ -137,17 +137,6 @@ class ReportController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function delivery_report()
-    {
-      // not created.
-        return view('pages.reports.print_demand');
-    }
-  
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function filament_usage()
     {
       // Get total data.
@@ -344,12 +333,14 @@ class ReportController extends Controller
         {
           if($row->part_color == $color)
           {
-            array_push($separated, $row);
+            array_push($report, $row);
           }
         } 
       }
       
-      die(var_dump($report));
+      print("<pre>".print_r($report, true)."</pre>");
+      
+      die();
       
       return view('pages.reports.weekly_scrap')
         ->with('colors', $filament_colors)

@@ -24,7 +24,27 @@
     </div>
     <div class="col-2">
       Unresolved Issues
-      <div id="unresolved_issues"></div>
+      <div id="unresolved_issues">
+        @if(count($messages) > 0)
+        @foreach($messages as $msg)
+          <div class="card text-white bg-{{$msg->alert_type}} mb-3">
+            <div class="card-body">
+              <h5 class="card-title">{{$msg->header}}</h5>
+              <p class="card-text">{{$msg->message}}</p>
+            </div>
+            <div class="card-footer">
+              <a class="btn btn-sm btn-outline-light" href="{{$msg->link}}">View</a>
+            </div>
+          </div>
+        @endforeach
+        @else
+          <div class="card text-white bg-success mb-3">
+            <div class="card-body">
+              <p class="card-text">You're all caught up.</p>
+            </div>
+          </div>
+        @endif
+      </div>
     </div>
   </div>
 </div>
@@ -110,39 +130,5 @@ var filament_pie_chart = new Chart(filamentDistrobution,{
     },
 });
 </script>
-<script>
-// Unresolved Issues
-var messages = [
-  @foreach($messages as $message)
-  {
-    header: "{{$message->header}}",
-    message: "{{$message->message}}",
-    alert_type: "{{$message->alert_type}}",
-    view: "{{$message->link}}",
-  },
-  @endforeach
-];
-if(messages.count() > 0)
-{
-  for(msg in messages)
-  {
-    $('#unresolved_issues').append(`
-    <div class="card text-white bg-`+msg.alert_type+` mb-3">
-      <div class="card-body">
-        <h5 class="card-title">`+msg.header+`</h5>
-        <p class="card-text">`+msg.message+`</p>
-      </div>
-      <div class="card-footer">
-        <a class="btn btn-sm btn-outline-light" href="`+msg.view+`">View</a>
-      </div>
-    </div>
-    `);
-  }
-}
-else
-{
-  $('#unresolved_issues').append('There are no message.');
-}
-
-</script>
+<script></script>
 @endsection

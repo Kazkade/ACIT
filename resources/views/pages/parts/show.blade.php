@@ -13,7 +13,7 @@
             </div>
           </div>
           <div class="card-header">
-            <a href="/parts" class="btn btn-outline-primary">Go Back</a>
+            <a href="/parts" class="btn btn-outline-primary">All Parts</a>
             @if(Auth::user()->account_type == 2)
               <form action="{{ route('parts.destroy' , $part->id)}}" class="float-right mx-2" method="POST">
                 <input name="_method" type="hidden" value="DELETE">
@@ -137,10 +137,10 @@
                 <th class="text-primary">Processing</th>
                 <th class="text-success">Backstock</th>
                 <th class="text-danger">Failed</th>
-                <th>Ordered</th>
-                <th>Delivered</th>
-                <th>Remaining</th>
-                <th>Overages</th>
+                <th><a href="/orders" class="text-dark"><u>Ordered</u></a></th>
+                <th><a href="/deliveries/all" class="text-dark"><u>Delivered</u></a></th>
+                <th><a href="/orders" class="text-dark"><u>Remaining</u></a></th>
+                <th><a href="/overages" class="text-dark"><u>Overages</u></a></th>
                 <th>Fail Rate</th> <!-- Calculation: Failed / Created -->
                 <th>Waste</th> <!-- Calculation: Failed * Weight -->
               </thead>
@@ -212,29 +212,21 @@
                   <th colspan=30 class="table-primary">Transfer History</th>
                 </tr>
                 <tr>
-                  <th colspan=2>Date</th>
-                  <th colspan=2>Tech</th>
-                  <th>Quantity</th>
+                  <th colspan=3>Date</th>
+                  <th colspan=3>Tech</th>
+                  <th colspan=2>Quantity</th>
                   <th>To</th>
                   <th>From</th>
-                  <th>Reversed</th>
-                  <th colspan=2>View</th>
                 </tr>
               </thead>
               <tbody>
                 @foreach($transfers as $transfer)
                   <tr>
-                    <td colspan=2>{{date('m-d-Y @ H:i', strtotime($transfer->updated_at))}}</td>
-                    <td colspan=2>{{$transfer->first_name}} {{$transfer->last_name}}</td>
-                    <td>{{$transfer->quantity}}</td>
-                    <td>{{$transfer->from_location_name}}</td>
-                    <td>{{$transfer->to_location_name}}</td>
-                    @if($transfer->reversal == 1)
-                      <td>Yes</td>
-                    @else
-                      <td>No</td>
-                    @endif
-                    <td colspan=2><a href="/locations/{{$transfer->to_location_id}}" class="btn btn-sm btn-outline-dark">View Location</a></td>
+                    <td colspan=3>{{date('m-d-Y @ H:i', strtotime($transfer->updated_at))}}</td>
+                    <td colspan=3>{{$transfer->first_name}} {{$transfer->last_name}}</td>
+                    <td colspan=2>{{$transfer->quantity}}</td>
+                    <td><a href="/locations/{{$transfer->from_location_id}}">{{$transfer->from_location_name}}</a></td>
+                    <td><a href="/locations/{{$transfer->to_location_id}}">{{$transfer->to_location_name}}</a></td>
                   </tr>
                 @endforeach
               </tbody>

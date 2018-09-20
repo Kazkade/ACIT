@@ -15,8 +15,6 @@ use App\Inventory;
 use App\Printer;
 use App\PrintProfile;
 
-//use DB; // For using SQL syntax. Try to stick to Eloquent unless it's absolutely necessary.
-
 class PartsController extends Controller
 {
     public function __construct()
@@ -30,52 +28,6 @@ class PartsController extends Controller
      */
     public function index()
     { 
-      
-      // Comment this out to avoid duplicate inventories.
-      // This will, when run, create inventories for every part and every locations.
-      // You should only need this when you've truncated the inventories, parts, and transfers tables
-      // and are re-uploading the CSV for the parts list.
-      // This process can take several minutes to complete.
-      /*
-      $parts = Part::all();
-      $locations = Location::all();
-      foreach($parts as $part)
-      {
-        foreach($locations as $location)
-        {
-          $inventory = new Inventory;
-          $inventory->location_id = $location->id;
-          $inventory->part_id = $part->id;
-          $inventory->to_total = 0;
-          $inventory->from_total = 0;
-          $inventory->save();
-        }
-          
-      }
-      */
-      
-      // Comment this out to avoid duplicate profiles.
-      // This will, when run, create profiles for every part and every printer.
-      // You should only need this when you've truncated the profiles tables.
-      // This process can take several minutes to complete.
-      /*
-      $parts = Part::all();
-      $printers = Printer::all();
-      foreach($parts as $part)
-      {
-        foreach($printers as $printer)
-        {
-          $profile = new PrintProfile;
-          $profile->printer_id = $printer->id;
-          $profile->part_id = $part->id;
-          $profile->lead_time = 0;
-          $profile->prints = 0;
-          $profile->active = 0;
-          $profile->save();
-        }
-          
-      }
-      */
       
       #### Actual Start ##############
       $parts = DB::table('parts')

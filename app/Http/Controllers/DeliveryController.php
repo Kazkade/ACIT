@@ -42,6 +42,17 @@ class DeliveryController extends Controller
         ->groupBy('part_id')
         ->get();
       
+      $bags1 = DB::table('bags')
+        ->join('parts', 'parts.id', '=', 'bags.part_id')
+        ->join('users', 'users.id', '=', 'bags.created_by')
+        ->select('bags.*', 'parts.part_serial', 'parts.part_name','users.id', 'users.last_name', 'users.first_name')
+        ->where('bags.delivered', '=', 0)
+        ->orderBy('parts.part_serial')
+        ->get();
+      
+      //print('<pre>'.print_r($bags1, true).'</pre>');
+      //die();
+      
       foreach($orders as $order)
       {
         $order->bag_count = 0;
@@ -88,8 +99,8 @@ class DeliveryController extends Controller
           'users.id as "user_id', 
           'users.first_name', 
           'users.last_name', 
-          'overages.quantity'
-          'overages.resolved'
+          'overages.quantity',
+          'overages.resolved',
           DB::raw('SUM(`bags`.`quantity`) as "total"'))
         ->groupBy('deliveries.id')
         ->get();

@@ -55,7 +55,6 @@ class OverageController extends Controller
       $new_mo = new Order;
       $new_mo->part_id = $overage->part_id;
       $new_mo->mo = "OV/".$overage->id;
-      $new_mo->delivery_id = $overage->delivery_id;
       $new_mo->quantity = $overage->quantity;
       $new_mo->filled = $overage->quantity;
       $new_mo->closed = 1;

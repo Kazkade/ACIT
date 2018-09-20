@@ -5,7 +5,7 @@
       @if(Auth::user()->admin == 1)
         style="background-color: #3F729B"
       @else
-        style="background-color: #42f46e"
+        style="background-color: #005e01"
       @endif
    @endif
 

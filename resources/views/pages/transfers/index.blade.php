@@ -19,7 +19,6 @@
             <th scope="col">From</th>
             <th scope="col"></th>
             <th scope="col">To</th>
-            <th scope="col">Reverse</th>
           </tr>
         </thead>
         <tbody>
@@ -71,11 +70,6 @@
                       {{$location->location_name}}
                     @endif
                   @endforeach
-                </td>
-                <td>
-                  @if($transfer->reversal == 0)
-                    <a href="/transfers/reverse/{{$transfer->id}}" class="btn btn-sm btn-outline-secondary d-block">&#8652</a>
-                  @endif
                 </td>
               </tr>
             @endforeach 

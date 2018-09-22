@@ -324,12 +324,12 @@ class OrderController extends Controller
       {
           
         // Look for current order with MO.
-        $temp_order = Order::where('mo', $row["name"])->first();
+        $temp_order = Order::where('mo', $row["Reference"])->first();
 
         // Priority Interpreter
         $priority_interpreted = 0; // Green by default.
         
-        switch($row["execution_priority_level"])
+        switch($row["Buffer On-Hand Alert Level"])
         {
           case "Red": $priority_interpreted = 2; break;
           case "Yellow": $priority_interpreted = 1; break;
@@ -340,9 +340,9 @@ class OrderController extends Controller
         // If found:
         if(!empty($temp_order))
         {
-          $temp_order->quantity = (int)$row["product_qty"];
-          $temp_order->created_at = $row["create_date"];
-          $temp_order->mo = $row["name"];
+          $temp_order->quantity = (int)$row["Product Quantity"];
+          $temp_order->created_at = $row["Created on"];
+          $temp_order->mo = $row["Reference"];
           $temp_order->priority = (int)$priority_interpreted;
           $temp_order->part_id = 0;
           // Set "Need new part error" flag to true by default.
@@ -351,7 +351,7 @@ class OrderController extends Controller
           $temp_part_serial = "";
           foreach(DB::table('parts')->get() as $part)
           {
-            if(strpos($row["product_id/default_code"], $part->part_serial) !== false)
+            if(strpos($row["Product/Internal Reference"], $part->part_serial) !== false)
             {
               // Get temp part serial.
               $temp_part_serial = $part->part_serial;
@@ -365,7 +365,7 @@ class OrderController extends Controller
           // Handle needing new part.
           if($missing_part_error == 1)
           {
-            array_push($missing_part_array, $temp_part_serial);
+            array_push($missing_part_array, $row["Product/Internal Reference"]);
             $missing_parts++;
             continue;
           }
@@ -379,14 +379,14 @@ class OrderController extends Controller
 
           // Create a new order.
           $new_order = new Order();
-          $new_order->mo = $row["name"];
+          $new_order->mo = $row["Reference"];
           $new_order->priority = (int)$priority_interpreted;
           $new_order->part_id = 0;
           // Check for missing part.
           $missing_part_error = 1;
           foreach(DB::table('parts')->get() as $part)
           {
-            if(strpos($part->part_serial, $row["product_id/default_code"]) !== false)
+            if(strpos($part->part_serial, $row["Product/Internal Reference"]) !== false)
             {
               // Get temp part serial.
               $temp_part_serial = $part->part_serial;
@@ -404,8 +404,8 @@ class OrderController extends Controller
             continue;
           }
           
-          $new_order->quantity = (int)$row["product_qty"];
-          $new_order->created_at = $row["create_date"];
+          $new_order->quantity = (int)$row["Product Quantity"];
+          $new_order->created_at = $row["Created on"];
           $new_order->save();
           $new_orders++;
         }

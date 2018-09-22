@@ -98,21 +98,30 @@ Route::post('part/moratorium/{id}', 'PartsController@moratorium')->name('parts.m
 Route::get('overages/resolve/{id}', "OverageController@resolve");
 Route::get('overages/unresolve/{id}', "OverageController@unresolve");
 
-// Tool Paths
+// User Routes
+Route::get('users/json_update/{json}', "UserController@json_update");
+
+// Dev Tool Routes
 Route::get('reset/inventory/{code}', 'DataController@reset_inventory');
 Route::get('regenerate', 'DataController@regenerate');
 
 // Resource Routes
-Route::resource('parts', 'PartsController');
-Route::resource('locations', 'LocationsController');
-Route::resource('transfers', 'TransfersController');
-Route::resource('orders', 'OrderController');
-Route::resource('deliveries', 'DeliveryController');
-Route::resource('users', 'UserController');
-Route::resource('profiles', 'ProfileController');
-Route::resource('overages', 'OverageController');
 Route::resource('configuration', 'ConfigurationController');
+Route::resource('deliveries', 'DeliveryController');
+Route::resource('locations', 'LocationsController');
+Route::resource('orders', 'OrderController');
+Route::resource('locations', 'LocationsController');
+Route::resource('overages', 'OverageController');
+Route::resource('parts', 'PartsController');
+Route::resource('profiles', 'ProfileController');
+Route::resource('transfers', 'TransfersController');
 Route::resource('users', 'UserController');
+
+// Error Routes
+Route::get('unauthorized', function() {
+  return View::make('errors.401');
+})->name('unauthorized');
+
 /*
 |--------------------------------------------------------------------------
 | Application Routes
@@ -126,5 +135,4 @@ Route::resource('users', 'UserController');
 
 Route::group(['middleware' => 'web'], function () {
     Route::auth();
-  
 });

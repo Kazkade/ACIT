@@ -31,7 +31,7 @@ class Kernel extends HttpKernel
         'web' => [
 
         ],
-
+      
         'api' => [
             'throttle:60,1',
         ],

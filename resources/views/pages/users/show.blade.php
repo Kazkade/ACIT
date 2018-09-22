@@ -16,7 +16,7 @@
     <span class="p-5"></span>
   </div>
 </div>
-<script>
+<!--<script>
 var user_data = [
   @foreach($users as $user)
     {
@@ -27,8 +27,8 @@ var user_data = [
       username:"{{$user->username}}", 
       email:"{{$user->email}}", 
       active:"{{$user->active}}", 
-      admin:"{{$user->admin}}",
-    },
+      admin:"{{$user->admin}}"
+  },
   @endforeach
 ]
 
@@ -114,5 +114,38 @@ $("#user_table").tabulator({
     });
   },
 });
+</script>
+-->
+<script>
+var config = {
+  type: 'pie',
+  data: {
+    datasets: [{
+      data: [
+        @foreach($data as $row)
+          
+        @endforeach
+      ],
+      backgroundColor: [
+        @foreach($filaments as $filament)
+          @if($filament->filament->name == "Black")
+            "#000000",        
+          @else
+            {{$filament->background_color}},
+          @endif
+        @endforeach
+      ],
+      label: 'User QC Rates'
+    }],
+    labels: [
+      @foreach($filaments as $filament)
+        {{$filament->filament_name}},
+      @endforeach
+    ]
+  },
+  options: {
+    responsive: true
+  }
+};
 </script>
 @endsection

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\User;
 use Validator;
+use DB;
 use Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -52,10 +53,11 @@ class AuthController extends Controller
     protected function validator(array $data)
     {
         return Validator::make($data, [
-            'first_name' => 'required|max:255',
-            'last_name' => 'required|max:255',
-            'email' => 'required|email|max:255|unique:users',
-            'password' => 'required|confirmed|min:6',
+          'first_name' => 'required|max:255',
+          'last_name' => 'required|max:255',
+          'email' => 'required|email|max:255|unique:users',
+          'password' => 'required|confirmed|min:6',
+          //'g-recaptcha-response'=>'required|recaptcha'
         ]);
     }
 
@@ -68,12 +70,21 @@ class AuthController extends Controller
      */
     protected function create(array $data)
     {
+      DB::enableQueryLog();
+      // Create Username from Email.
+        $arr = explode("@", $data['email'], 2);
+        $first = $arr[0];
+        $data['username'] = $first;
+        
+        // Create The User
         return User::create([
-            'first_name' => $data['first_name'],
-            'last_name' => $data['last_name'],
-            'email' => $data['email'],
-            'password' => bcrypt($data['password']),
+          'first_name' => $data['first_name'],
+          'last_name' => $data['last_name'],
+          'email' => $data['email'],
+          'username' => $data['username'],
+          'password' => bcrypt($data['password']),
         ]);
+      
+        
     }
-  
 }

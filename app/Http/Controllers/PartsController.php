@@ -8,6 +8,7 @@ use App\Http\Requests;
 use App\Http\Controllers\Controller;
 
 use Auth;
+use App\AdminEnforcer;
 use App\Part;
 use App\Transfer;
 use App\Location;
@@ -28,6 +29,7 @@ class PartsController extends Controller
      */
     public function index()
     { 
+      
       
       #### Actual Start ##############
       $parts = DB::table('parts')
@@ -87,17 +89,6 @@ class PartsController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        // The creation form is on the sidebar for admins.
-        return view('pages.parts.index');
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -105,7 +96,9 @@ class PartsController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        if(AdminEnforcer::Enforce()){
+          return redirect()->route('unauthorized');  
+        }
         $this->validate($request, [
           'part_name' => 'required',
           'part_serial' => 'required',
@@ -307,18 +300,6 @@ class PartsController extends Controller
           ->with('transfers', $transfers)
           ->with('printers', $printers);
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        $part = Part::find($id);
-        return view('pages.parts.edit')->with('part', $part);
-    }
   
     /**
      * Update the specified resource in storage.
@@ -327,6 +308,10 @@ class PartsController extends Controller
      */
     public function update_or_create($json)
     {
+      if(AdminEnforcer::Enforce()){
+        return redirect()->route('unauthorized');  
+      }
+      
       $var = json_decode($json);
       
       $new_entries = 0;
@@ -393,39 +378,6 @@ class PartsController extends Controller
     }
   
     /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-        $this->validate($request, [
-          'part_name' => 'required',
-          'part_serial' => 'required',
-          'part_color' => 'required',
-          'part_version' => 'required',
-          'part_weight' => 'required',
-        ]);
-      
-        // Create Part
-        $part = Part::find($id);
-        $part->part_name = $request->input('part_name');
-        $part->part_serial = $request->input('part_serial');
-        $part->part_color = $request->input('part_color');
-        $part->part_weight = $request->input('part_weight');
-        $part->part_version = $request->input('part_version');
-        if($request->get('part_cleaned') == null) {
-          $part->part_cleaned = 0;
-        } else {
-          $part->part_cleaned = 1;
-        }
-        $part->save();
-        return redirect("/parts")->with('success', 'Part Created!');
-    }
-    /**
      * Changes moratorium status.
      *
      * @param  int  $id
@@ -433,10 +385,13 @@ class PartsController extends Controller
      */
     public function moratorium($id)
     {
-        $part = Part::find($id);
-        $part->in_moratorium = ($part->in_moratorium == 0) ? 1 : 0;
-        $part->save();
-        return redirect("/parts/".$id);
+      if(AdminEnforcer::Enforce()){
+        return redirect()->route('unauthorized');  
+      }
+      $part = Part::find($id);
+      $part->in_moratorium = ($part->in_moratorium == 0) ? 1 : 0;
+      $part->save();
+      return redirect("/parts/".$id);
     }
     
     /**
@@ -447,7 +402,9 @@ class PartsController extends Controller
      */
     public function destroy($id)
     {    
-      if(Auth::user()->admin != 1) { return redirect()-route('parts.index')->with('error', 'You don\'t have permission to do that.'); }
+      if(AdminEnforcer::Enforce()){
+        return redirect()->route('unauthorized');  
+      }
       
       // Remove everything.
       $inventories = DB::table('inventories')->where('part_id', '=', $id)->delete();

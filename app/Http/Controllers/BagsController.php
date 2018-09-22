@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use DB;
+use App\PermissionEnforcer;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use App\Location;
@@ -108,6 +109,10 @@ class BagsController extends Controller
      */
     public function destroy($id)
     {
+      if(AdminEnforcer::Enforce()){
+        return redirect()->route('unauthorized');  
+      }
+      
       // Get bag with ID
       $bag = Bag::destroy($id);
 
@@ -122,6 +127,11 @@ class BagsController extends Controller
      */
     public function hand_deliver($id)
     {
+      
+      if(AdminEnforcer::Enforce()){
+        return redirect()->route('unauthorized');  
+      }
+      
       // Get bag with ID
       $bag = Bag::find($id);
       

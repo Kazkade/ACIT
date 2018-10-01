@@ -30,7 +30,7 @@ class PartsController extends Controller
     public function index()
     { 
       
-      
+      if(!\App\PermissionEnforcer::Protect("parts_index")) { return response("Unauthorized", 401); }
       #### Actual Start ##############
       $parts = DB::table('parts')
         ->orderBy('id', 'asc')
@@ -96,9 +96,7 @@ class PartsController extends Controller
      */
     public function store(Request $request)
     {
-        if(AdminEnforcer::Enforce()){
-          return redirect()->route('unauthorized');  
-        }
+        if(!\App\PermissionEnforcer::Protect("parts_create")) { return response("Unauthorized", 401); }
         $this->validate($request, [
           'part_name' => 'required',
           'part_serial' => 'required',
@@ -162,6 +160,7 @@ class PartsController extends Controller
      */
     public function show($id)
     {
+        if(!\App\PermissionEnforcer::Protect("parts_index")) { return response("Unauthorized", 401); }
         $part = Part::find($id);
         $locations = Location::all();
         $inventories = DB::table('inventories')->where('part_id', '=', $id)->get();
@@ -307,11 +306,8 @@ class PartsController extends Controller
      * @param  \Illuminate\Http\Request  $request
      */
     public function update_or_create($json)
-    {
-      if(AdminEnforcer::Enforce()){
-        return redirect()->route('unauthorized');  
-      }
-      
+    { 
+      if(!\App\PermissionEnforcer::Protect("parts_modify")) { return response("Unauthorized", 401); }
       $var = json_decode($json);
       
       $new_entries = 0;
@@ -385,9 +381,7 @@ class PartsController extends Controller
      */
     public function moratorium($id)
     {
-      if(AdminEnforcer::Enforce()){
-        return redirect()->route('unauthorized');  
-      }
+      if(!\App\PermissionEnforcer::Protect("parts_moratorium")) { return response("Unauthorized", 401); }
       $part = Part::find($id);
       $part->in_moratorium = ($part->in_moratorium == 0) ? 1 : 0;
       $part->save();
@@ -402,9 +396,8 @@ class PartsController extends Controller
      */
     public function destroy($id)
     {    
-      if(AdminEnforcer::Enforce()){
-        return redirect()->route('unauthorized');  
-      }
+      
+      if(!\App\PermissionEnforcer::Protect("parts_delete")) { return response("Unauthorized", 401); }
       
       // Remove everything.
       $inventories = DB::table('inventories')->where('part_id', '=', $id)->delete();

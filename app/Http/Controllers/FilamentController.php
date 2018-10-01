@@ -26,6 +26,7 @@ class FilamentController extends Controller
      */
     public function store(Request $request)
     {
+      if(!\App\PermissionEnforcer::Protect("filaments_create")) { return response("Unauthorized", 401); }
       //
       $this->validate($request, [
         'filament_name' => 'required',
@@ -45,18 +46,6 @@ class FilamentController extends Controller
       return redirect()->route('configuration.index')
         ->with('success', "Filament created!");
     }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        return redirect()->route('configuration.index')->with('error', "You shouldn't be using that route.");
-    }
   
     /**
      * Remove the specified resource from storage.
@@ -66,6 +55,7 @@ class FilamentController extends Controller
      */
     public function toggle($id)
     {    
+        if(!\App\PermissionEnforcer::Protect("filaments_moratorium")) { return response("Unauthorized", 401); }
         $filament = DB::table('filaments')->where('id', '=', $id)->first();
       
         $active = 0;
@@ -90,6 +80,7 @@ class FilamentController extends Controller
      */
     public function destroy($id)
     {    
+      if(!\App\PermissionEnforcer::Protect("filaments_delete")) { return response("Unauthorized", 401); }
         $filament = DB::table('filaments')
           ->where('id', '=', $id)
           ->delete();

@@ -7,20 +7,21 @@
     <div class="col-10">
       <div class="card mb-5">
           <div class="card-header">
-              <span class="h2 m-2">{{$part->part_serial}} ({{$part->part_name}})</span>
+            <span class="h2 m-2">{{$part->part_serial}} ({{$part->part_name}})</span>
             <div class="float-right text-right">
               Last Updated: {{ date('m-d-Y @ H:i', strtotime($part->updated_at)) }}
             </div>
           </div>
           <div class="card-header">
             <a href="/parts" class="btn btn-outline-primary">All Parts</a>
-            @if(Auth::user()->account_type == 2)
+            @if(\App\PermissionEnforcer::Protect("parts_delete"))
               <form action="{{ route('parts.destroy' , $part->id)}}" class="float-right mx-2" method="POST">
                 <input name="_method" type="hidden" value="DELETE">
                 {{ csrf_field() }}
                 <button type="submit" class="btn btn-outline-danger ">&#10006 Delete</button>
               </form>
-              <a href="{{route('parts.edit', $part->id)}}" class="btn btn-outline-info float-right mx-2">Edit</a>
+            @endif
+            @if(\App\PermissionEnforcer::Protect("parts_moratorium"))
               <form action="{{ route('parts.moratorium' , $part->id)}}" class="float-right mx-2" method="POST">
                 {{ csrf_field() }}
                 @if($part->in_moratorium == 0)

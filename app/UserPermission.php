@@ -6,21 +6,9 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class UserPermission extends Authenticatable
 {
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
-    protected $fillable = [
-       
-    ];
-
-    /**
-     * The attributes excluded from the model's JSON form.
-     *
-     * @var array
-     */
-    protected $hidden = [
-        
-    ];
+    // Table
+    protected $table = 'user_permissions';
+    protected $primaryKey = 'id';
+    // Put other elements here.
+    public $timestamps = true;
 }

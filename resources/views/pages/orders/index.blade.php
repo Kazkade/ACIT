@@ -6,7 +6,7 @@
     <div class="col-2">
     </div>
     <div class="col-4">
-      @if(Auth::user()->account_type == 2)
+      @if(\App\PermissionEnforcer::Protect('orders_upload'))
         <h3>
           Upload New Orders
         </h3>
@@ -26,6 +26,8 @@
             </div>
           </form>        
       </div>
+      @endif
+      @if(\App\PermissionEnforcer::Protect('orders_create'))
       <div class='col-4'>
         <h3>
           Create New Orders
@@ -59,13 +61,13 @@
           </form>        
         </div>
     </div>
+    @endif
     <div class="row">
       <div class='col-2'></div>
       <div class="col-8">
         <h3>
           Outstanding Orders
         </h3>
-      @endif
       @if(count($orders) > 0)
         <a class="btn btn btn-outline-success d-block my-3" href="/deliver_order">Deliver All</a>
       @endif

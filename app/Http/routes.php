@@ -19,11 +19,6 @@ use App\Http\Controllers\Controller;
 
 Route::get('/', 'DashboardController@index');
 
-Route::get('dashboard', [
-    'middleware' => 'auth:api',
-    'uses' => 'PagesController@dashboard'
-]);
-
 Route::get('ajax/part_info/{serial}', function($serial) {
   
   DB::enableQueryLog();
@@ -85,6 +80,9 @@ Route::post('printer/store', 'PrinterController@store');
 Route::post('printer/toggle/{id}', 'PrinterController@toggle');
 Route::post('printer/destroy/{id}', 'PrinterController@destroy');
 
+// Machine Routes
+Route::delete('machines/destroy/{id}', 'MachineController@destroy');
+
 // Filament Routes
 Route::post('filament/store', 'FilamentController@store');
 Route::post('filament/toggle/{id}', 'FilamentController@toggle');
@@ -98,19 +96,32 @@ Route::post('part/moratorium/{id}', 'PartsController@moratorium')->name('parts.m
 Route::get('overages/resolve/{id}', "OverageController@resolve");
 Route::get('overages/unresolve/{id}', "OverageController@unresolve");
 
-// User Routes
+// JSON Update Routes
+Route::get('machines/ajaxupdate', "MachineController@ajaxupdate");
 Route::get('users/json_update/{json}', "UserController@json_update");
+
+// User Permission
+Route::get('users/update_permission/{user_id}/{permission}/{value}', "UserController@update_permission");
+Route::get('permissions', "PermissionController@index")->name('permissions.index');
+Route::get('permissions/ajax', "PermissionController@ajax")->name('permissions.ajax');
+Route::get('permissions/update_permission/{permission}/{value}/{description}', "PermissionController@update_permission");
+Route::get('permissions/{permission}/{value}/{description}', "PermissionController@store")->name('permissions.store');
+Route::get('permissions/destroy/{permission}',"PermissionController@destroy")->name('permissions.destroy');
+
+// Invite Users
+Route::get('users/invite/{email}', 'UserController@invite');
 
 // Dev Tool Routes
 Route::get('reset/inventory/{code}', 'DataController@reset_inventory');
 Route::get('regenerate', 'DataController@regenerate');
 
 // Resource Routes
-Route::resource('configuration', 'ConfigurationController');
 Route::resource('deliveries', 'DeliveryController');
 Route::resource('locations', 'LocationsController');
+Route::resource('machines', 'MachineController');
+Route::resource('maintenance', 'MaintenanceController');
+Route::resource('task_schedule', 'TaskScheduleController');
 Route::resource('orders', 'OrderController');
-Route::resource('locations', 'LocationsController');
 Route::resource('overages', 'OverageController');
 Route::resource('parts', 'PartsController');
 Route::resource('profiles', 'ProfileController');

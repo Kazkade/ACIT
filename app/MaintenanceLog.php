@@ -4,10 +4,10 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class PrintProfile extends Model
+class MaintenanceLog extends Model
 {
     // Table
-    protected $table = 'print_profiles';
+    protected $table = 'maintenance_logs';
     protected $primaryKey = 'id';
     // Put other elements here.
     public $timestamps = true;

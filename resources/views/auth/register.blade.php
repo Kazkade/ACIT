@@ -1,5 +1,4 @@
 @extends('layouts.app')
-
 @section('content')
 <style rel="stylesheet" type="text/css">
   body {
@@ -19,6 +18,11 @@
                 <div class="card-body" >
                   {!! csrf_field() !!}
 
+                  @if ($errors->has('name'))
+                      <span class="help-block">
+                          <strong>{{ $errors->first('name') }}</strong>
+                      </span>
+                  @endif
                   <div class="mb-3 input-group{{ $errors->has('name') ? ' has-error' : '' }}">
                       <div class="input-group-prepend">
                         <span class="input-group-text">First & Last Name</span>
@@ -26,55 +30,46 @@
                       <input type="text" class="form-control" name="first_name" placeholder="First Name" value="{{ old('first_name') }}">
                       <input type="text" class="form-control" name="last_name" placeholder="Last Name" value="{{ old('last_name') }}">
 
-                      @if ($errors->has('name'))
-                          <span class="help-block">
-                              <strong>{{ $errors->first('name') }}</strong>
-                          </span>
-                      @endif
                   </div>   
                   
+                  @if ($errors->has('email'))
+                      <span class="help-block">
+                          <strong>{{ $errors->first('email') }}</strong>
+                      </span>
+                  @endif
                   <div class="mb-3 input-group{{ $errors->has('email') ? ' has-error' : '' }}">
                       <div class="input-group-prepend">
                         <span class="input-group-text">Email</span>
                       </div>
                       <input type="email" class="form-control" name="email" placeholder="Email" value="{{ old('email') }}">
 
-                      @if ($errors->has('email'))
-                          <span class="help-block">
-                              <strong>{{ $errors->first('email') }}</strong>
-                          </span>
-                      @endif
                   </div>                  
 
+                  @if ($errors->has('password'))
+                      <span class="help-block">
+                          <strong>{{ $errors->first('password') }}</strong>
+                      </span>
+                  @endif
                   <div class="mb-3 input-group{{ $errors->has('password') ? ' has-error' : '' }}">
                       <div class="input-group-prepend">
                         <span class="input-group-text">Password</span>
                       </div>
                       <input type="password" class="form-control" placeholder="Password" name="password">
 
-                      @if ($errors->has('password'))
-                          <span class="help-block">
-                              <strong>{{ $errors->first('password') }}</strong>
-                          </span>
-                      @endif
                   </div>
 
+                  @if ($errors->has('password_confirmation'))
+                      <span class="help-block">
+                          <strong>{{ $errors->first('password_confirmation') }}</strong>
+                      </span>
+                  @endif
                   <div class="input-group{{ $errors->has('password_confirmation') ? ' has-error' : '' }}">
                       <div class="input-group-prepend">
                         <span class="input-group-text">Confirm Password</span>
                       </div>
                       <input type="password" class="form-control" placeholder="Confirm Password" name="password_confirmation">
-
-                      @if ($errors->has('password_confirmation'))
-                          <span class="help-block">
-                              <strong>{{ $errors->first('password_confirmation') }}</strong>
-                          </span>
-                      @endif
                   </div>
 
-                </div>
-                <div class="card-footer">
-                  <center><div class="g-recaptcha" data-sitekey="6LfwOWUUAAAAAGQWtedgB2cOVxHp2IVLsdIpyM99"></div></center>
                 </div>
                 <div class="card-footer">
                   <div class="form-group">
@@ -90,5 +85,4 @@
         </div>
     </div>
 </div>
-<script src='https://www.google.com/recaptcha/api.js'></script>
 @endsection

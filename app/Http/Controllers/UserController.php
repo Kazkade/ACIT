@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use DB;
+use Auth;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use App\Part;
@@ -12,7 +13,9 @@ use App\Transfer;
 use App\Location;
 use App\Inventory;
 use App\Bag;
+use App\Invite;
 use App\User;
+use App\UserPermission;
 
 //use DB; // For using SQL syntax. Try to stick to Eloquent unless it's absolutely necessary.
 
@@ -51,32 +54,9 @@ class UserController extends Controller
           ->first();
       
         $user_permissions = DB::table('user_permissions')
+          ->orderBy('permission', 'asc')
           ->where('user_id', '=', $id)
           ->get();
-        
-        $permission_keys = DB::table('permission_keys')
-          ->get();
-      
-        foreach($permission_keys as $key)
-        {
-          $needs_key = 1;
-          foreach($user_permissions as $perm)
-          {
-            if($perm->permission == $key->key_name)
-            {
-              $needs_key = 0;
-            }
-          }
-          
-          if($needs_key == 1)
-          {
-            $user_permission = new UserPermission();
-            $user_permission->permission = $key->key_name;
-            $user_permission->value = $key->default_value;
-            $user_permission->user_id = $id;
-            $user_permission->save();
-          }
-        }
         
         return view('pages.users.show')
           ->with('user', $user)
@@ -107,7 +87,63 @@ class UserController extends Controller
         
         return json_encode("User updated!");
     }
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update_permission($user_id, $permission, $value)
+    {    
+      
+      if($permission == "admin")
+      {
+        DB::table('users')
+          ->where('id', '=', $user_id)
+          ->update(['admin' => $value]);
+        return json_encode(response("User admin priveleges chaned."));
+      }
+      
+      DB::table('user_permissions')
+        ->where('user_id', '=', $user_id)
+        ->where('permission', '=', $permission)
+        ->update(['value' => $value]);
+      return json_encode(response("Permission ".$permission." updated to ".$value." for user ".$user_id."."));
 
+    }
+  
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function invite($email)
+    {    
+        
+        $invite = new Invite();
+        $invite->email = $email;
+        $invite->redeem_token = bin2hex(random_bytes(128));
+        $invite->invited_by = Auth::user()->id;
+        $invite->expires_at = date('Y-m-d H:i:s', strtotime(time() + (86400 * 7)));
+        $invite->save();
+      
+        $url = "/register?redeem_token=".$invite->redeem_token;
+      
+        $to = $invite->email;
+        $subject = Auth::user()->username." has invited you to ACIT!";
+        $message = "You've been invited to create an ACIT account.<br>You can follow the link below to create an account.<br>".config('app.dev_url').$url;
+        
+        $ret = array(
+          "to" => $to, 
+          "subject" => $subject, 
+          "message" => $message
+        );
+      
+        return $ret;
+      
+    }
+  
     /**
      * Remove the specified resource from storage.
      *
@@ -119,9 +155,9 @@ class UserController extends Controller
 
       User::destroy($id);
       DB::table('user_permissions')
-        ->where('id', '=', $id)
+        ->where('user_id', '=', $id)
         ->delete();
-      return redirect()->route('users.index')->with('success', 'Part '.$part->part_serial.' deleted. '.$deleted_inventories.' were deleted.');
+      return redirect()->route('users.index')->with('success', 'User deleted.');
 
     }
 }

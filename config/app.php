@@ -1,7 +1,35 @@
 <?php
 
 return [
-
+  
+    /*
+    |--------------------------------------------------------------------------
+    | Custom Configuration
+    |--------------------------------------------------------------------------
+    |
+    | These are custom configuaration keys used by the application.
+    | These were originally part of the database, but putting them here would
+    | likely be better.
+    | To get their value, just call config('key_name');
+    |
+    */
+    
+    // Some features will be accessible under this mode. For example, seeing, setting, and deleting permission keys.
+    'dev_mode' => 1,
+    
+    // This shows the "locations" menu option in the navbar. Setting this to true allows users to view locations.
+    'show_locations' => 0,
+  
+    // Data Auto-Generation:
+    // This will grab the file structure from the 'auto_generate_url' and create 
+    // Parts, Print_Profiles, Filaments, and Printers assuming its' setup correctly.
+    // This feature isn't implemented, yet, so don't even worry about it.
+    'auto_generate_from_repo' => 0,
+    'auto_generate_repo' => '',
+  
+    // Aleph Delivery Method
+    'use_aleph_delivery_method' => 1, // This adds a box number next to the bags when marking them for delivery.
+  
     /*
     |--------------------------------------------------------------------------
     | Application Environment
@@ -38,8 +66,9 @@ return [
     | your application so that it is used when running Artisan tasks.
     |
     */
-
-    'url' => 'http://localhost',
+    
+    'dev_url' => 'http://aleph-cluster-inventory-tool-kazkade12792240815.codeanyapp.com',
+    'url' => 'http://acit.alephobjects.com',
 
     /*
     |--------------------------------------------------------------------------

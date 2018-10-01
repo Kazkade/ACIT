@@ -1,151 +1,181 @@
 @extends('layouts.app') 
 @section('content')
-<div class="container-fluid">
+<style>
+.switch {
+  position: relative;
+  float: right;
+  display: inline-block;
+  width: 44px;
+  height: 18px;
+}
+  
+td {
+  height: 50px;
+  vertical-align: middle;
+}
+
+.switch input {display:none;}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin-bottom: -3px;
+  margin-top: 3px;
+  margin-right: 3px;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 12px;
+  width: 12px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(23px);
+  -ms-transform: translateX(23px);
+  transform: translateX(23px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+</style>
+<div class="container">
   <div class="row">
-    <div class="col-2"></div>
-    <div class="col-8 ">
-      <div id="message"></div>
-      <h3>
-        Users
-      </h3>
-      <div id="user_table"></div>
+    <div class="col my-3">
+      <div class="card">
+        <div class="card-header">
+          <h3>User <b>{{$user->username}}</b> ({{$user->first_name}} {{$user->last_name}})</h3>
+        </div>
+        <div class="card-header">
+          <form class="float-right form-inline" action="/users/{{$user->id}}" method="POST">
+            <input hidden name="_method" value="DELETE">
+            <input hidden name="_token" value="{{csrf_token()}}">
+            <input type="submit" class="btn btn-outline-danger" value="X Delete {{$user->first_name}}">
+          </form>
+        </div>
+        <div class="card-body">
+          <h4 class="card-title">User Statistics</h4>
+          
+        </div>
+      </div>
     </div>
   </div>
-  
+  <div class="row">
+    <div class="col">
+      <div class="card">
+        
+      </div>
+    </div>
+    <div class="col">
+      <div class="card">
+        
+      </div>
+      <div class="card">
+        
+      </div>
+      <div class="card">
+        
+      </div>
+    </div>
+    <div class="col">
+      <div class="card">
+        <div class="card-header">
+          Permissions
+        </div>
+        <div class="card-body">
+          <table class="w-100 table-striped">
+            <tbody>
+              <tr>
+                <td><input readonly class="form-control bg-primary text-light" disabled="disabled" style="margin-left: 5px;" value="admin"></td>
+                @if(\App\PermissionEnforcer::Protect("users_change_permissions"))
+                  <td>
+                    <label class="switch">
+                      <input type="checkbox" class="permission" user_id="{{$user->id}}" perm="admin"
+                             @if(Auth::user()->admin == 1)
+                             checked
+                             @endif
+                             >
+                      <span class="slider round"></span>
+                    </label>
+                  </td>
+                @endif
+              </tr>
+              @foreach($permissions as $permission)
+                <tr>
+                  <td><input class="form-control dislabed" disabled="disabled" style="margin-left: 5px;" value="{{$permission->permission}}"></td>
+                  @if(\App\PermissionEnforcer::Protect("users_change_permissions"))
+                    <td>
+                      <label class="switch">
+                        <input type="checkbox" class="permission" user_id="{{$user->id}}" perm="{{$permission->permission}}"
+                               @if($permission->value == 1)
+                               checked
+                               @endif
+                               >
+                        <span class="slider round"></span>
+                      </label>
+                    </td>
+                  @endif
+                </tr>
+              @endforeach
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="row">
     <span class="p-5"></span>
   </div>
 </div>
-<!--<script>
-var user_data = [
-  @foreach($users as $user)
-    {
-      last_updated: "{{$user->updated_at}}", 
-      id:{{$user->id}}, 
-      first_name:"{{$user->first_name}}",
-      last_name: "{{$user->last_name}}", 
-      username:"{{$user->username}}", 
-      email:"{{$user->email}}", 
-      active:"{{$user->active}}", 
-      admin:"{{$user->admin}}"
-  },
-  @endforeach
-]
-
-var editable = 
-    @if(Auth::user()->admin == 1)
-      true;
-    @else
-      false;
-    @endif
-  
-if(editable)
-{
-  $('#message').append(`
-    <div class='alert alert-warning' role='alert'>
-      This data is live and editable. Any changes made will be saved.
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-      </button>
-    </div>
-  `);
-}
-  
-$("#user_table").tabulator({
-	layout:"fitColumns",
-  data: user_data,
-	tooltips:false,
-	addRowPos:"top",
-	history:true,
-	pagination:"local",
-	paginationSize:10,
-	movableColumns:false,
-	resizableRows:false,
-	initialSort:[
-		{column:"first_name", dir:"asc"},
-    {column:"last_name", dir:"asc"}
-	],
-	columns:[
-		{title:"Last Updated",  align: "center", field:"last_updated", width: 250, editor: false},
-		{title:"First", field:"first_name", align: "center", editor: editable},
-    {title:"Last", field:"last_name", align: "center", editor: editable},
-		{title:"Username", field:"username", align: "center", editor: editable},
-		{title:"Email", field:"email", align: "center", width: 300, editor: editable},
-		{title:"Active", field:"active", width:120,  align:"center", formatter:"tickCross", sorter:"boolean", editor: editable},
-    {title:"Admin", field:"admin", width:120,  align:"center", formatter:"tickCross", sorter:"boolean", editor: editable},
-    {title:"View",  align: "center", field:"id", width:100, formatter:function(cell, formatterParams){
-      var value = cell.getValue();
-      if(value > 0){
-        return "<a class='btn btn-sm btn-outline-dark d-block' href='users/"+value+"'>View</span>";
-      }else{
-        return "<a class='btn btn-sm btn-outline-dark disabled d-block' disabled='disabled' href='#'>View</span>";
-      }
-    }},
-	],
-  cellEdited:function(cell){
-    var row = cell.getData();
-    console.log(JSON.stringify(row));
-    $.ajax({
-      type: "GET",
-      headers: {
-        'X-CSRF-TOKEN': "{{ csrf_token() }}",
-      },
-      dataType: "JSON",
-      url: "users/json_update/"+JSON.stringify(row),
-      success: function(msg) {
-        row = cell.getElement()
-          .animate({ backgroundColor: "#c7ffc4"}, 100)
-          .animate({ backgroundColor: "#FFFFFF"}, 200);
-      },
-      error: function(xhr, err, msg)
-      {
-        $('#message').append(`
-          <div class='alert alert-danger' role='alert'>
-            There was an error saving data: <strong>`+msg+`</strong>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-        `);
-        row = cell.getElement()
-          .animate({ backgroundColor: "#ffbfc3"}, 100)
-          .animate({ backgroundColor: "#FFFFFF"}, 200);
-      }
-    });
-  },
-});
-</script>
--->
 <script>
-var config = {
-  type: 'pie',
-  data: {
-    datasets: [{
-      data: [
-        @foreach($data as $row)
-          
-        @endforeach
-      ],
-      backgroundColor: [
-        @foreach($filaments as $filament)
-          @if($filament->filament->name == "Black")
-            "#000000",        
-          @else
-            {{$filament->background_color}},
-          @endif
-        @endforeach
-      ],
-      label: 'User QC Rates'
-    }],
-    labels: [
-      @foreach($filaments as $filament)
-        {{$filament->filament_name}},
-      @endforeach
-    ]
-  },
-  options: {
-    responsive: true
-  }
-};
+$('.permission').on('click', function() {
+  
+  var permission = $(this).attr('perm');
+  var value = ($(this).prop('checked')) ? 1 : 0;
+  var user = $(this).attr('user_id');
+  
+  $.ajax({
+    type: "GET",
+    headers: {
+      'X-CSRF-TOKEN': "{{ csrf_token() }}",
+    },
+    dataType: "JSON",
+    url: "/users/update_permission/"+user+"/"+permission+"/"+value,
+    success: function(msg) {
+      console.log(msg);
+    },
+    error: function(xhr, err, msg) {
+      console.log(err + ":" + msg);
+    }
+  });
+  
+});
 </script>
 @endsection

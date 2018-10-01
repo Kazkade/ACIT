@@ -5,6 +5,57 @@
     <div class="col-2"></div>
     <div class="col-8 ">
       <div id="message"></div>
+      @if(\App\PermissionEnforcer::Protect("users_create"))
+      <div class="row">
+        <div class="col-3">
+          
+        </div>
+        <div class="col-6">
+          <div class="card">
+            <div class="card-header">
+              <h3>
+                Invite New User
+              </h3>
+            </div>
+            <div class="card-body">
+              <form action="#" id="invite-form" method="POST">
+                <input hidden name="_method" value="POST">
+                <input hidden name="_token" value="{{csrf_token()}}">
+                <input class="form-control" value="" id="invite-email" name="email" placeholder="Email">
+                <input type="submit" id="create_new_user" class="btn btn-outline-primary w-100" id="invite-submit" value="Invite New User">
+              </form>
+              <div>
+                Email relay isn't working. Copy the box below and send it to <br>
+                <div class="row">
+                  <div class="col-2">
+                    <span>To</span>
+                  </div>
+                  <div class="col-10">
+                    <div class="alert alert-secondary" id="email-to"></div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-2">
+                    <span>Subject</span>
+                  </div>
+                  <div class="col-10">
+                    <div class="alert alert-secondary" id="email-subject"></div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-2">
+                    <span>Body</span>
+                  </div>
+                  <div class="col-10">
+                    <div class="alert alert-secondary" id="email-code"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      @endif
       <h3>
         Users
       </h3>
@@ -21,13 +72,15 @@ var user_data = [
   @foreach($users as $user)
     {
       last_updated: "{{$user->updated_at}}", 
-      id:{{$user->id}}, 
       first_name:"{{$user->first_name}}",
       last_name: "{{$user->last_name}}", 
       username:"{{$user->username}}", 
       email:"{{$user->email}}", 
       active:"{{$user->active}}", 
       admin:"{{$user->admin}}",
+      id:{{$user->id}}, 
+      @if($user->active == 1)
+      @endif
     },
   @endforeach
 ]
@@ -114,5 +167,34 @@ $("#user_table").tabulator({
     });
   },
 });
+</script>
+<script>
+$('#invite-form').submit(function(event) {
+  event.preventDefault();
+  $.ajax({
+      type: "GET",
+      headers: {
+        'X-CSRF-TOKEN': "{{ csrf_token() }}",
+      },
+      dataType: "JSON",
+      url: "users/invite/"+$('#invite-email').val(),
+      success: function(msg) {
+        $("#email-to").html(msg.to);
+        $("#email-subject").html(msg.subject);
+        $("#email-code").html(msg.message);
+      },
+      error: function(xhr, err, msg)
+      {
+        $('#message').append(`
+          <div class='alert alert-danger' role='alert'>
+            There was an error saving data: <strong>`+msg+`</strong>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        `);
+      }
+    });
+})
 </script>
 @endsection

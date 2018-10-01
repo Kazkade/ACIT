@@ -24,6 +24,7 @@ class LocationsController extends Controller
      */
     public function index()
     {
+        if(!\App\PermissionEnforcer::Protect("locations_index")) { return response("Unauthorized", 401); }
         $locations = Location::all();
         return view('pages.locations.index')
           ->with('locations', $locations);

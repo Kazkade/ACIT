@@ -3,16 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
+use DB;
 
-use App\Part;
-use App\Printer;
-
-//use DB; // For using SQL syntax. Try to stick to Eloquent unless it's absolutely necessary.
-
-class ConfigurationController extends Controller
+class ScheduledTaskController extends Controller
 {
     public function __construct()
     {
@@ -24,12 +20,20 @@ class ConfigurationController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index()
-    { 
-      $printers = DB::table('printers')->get();
-      $filaments = DB::table('filaments')->get();
-      return view('pages.configuration.index')
-        ->with('printers', $printers)
-        ->with('filaments', $filaments);
+    {
+        $log = DB::table('maintenance_logs as ml')
+          ->join('users', 'users.id', '=', 'ml.user_id')
+          ->join('machines', 'machines.id', '=', 'ml.machine_id')
+          ->join('printers', 'printers.id', '=', 'machines.id')
+          ->select(
+            'ml.updated_at', 'ml.task',
+            'users.first_name', 'users.last_name',
+            'machines.machine_serial', 'machines.id as machine_id',
+            'printers.name as printer_name')
+          ->get();
+      
+        return view('pages.maintenance.index')
+          ->with('log', $log);
     }
 
     /**
@@ -39,7 +43,7 @@ class ConfigurationController extends Controller
      */
     public function create()
     {
-        
+        //
     }
 
     /**
@@ -61,7 +65,7 @@ class ConfigurationController extends Controller
      */
     public function show($id)
     {
-
+        
     }
 
     /**
@@ -72,7 +76,7 @@ class ConfigurationController extends Controller
      */
     public function edit($id)
     {
-
+        //
     }
 
     /**
@@ -84,7 +88,7 @@ class ConfigurationController extends Controller
      */
     public function update(Request $request, $id)
     {
-
+        
     }
 
     /**
@@ -94,9 +98,12 @@ class ConfigurationController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
-    {    
-
+    {
+      
+        MaintenanceLog::delete($id);
+      
+        return redirect()->route('maintenance.index')
+          ->with('success', 'Maintenance Deleted.');
+      
     }
-  
-  
 }

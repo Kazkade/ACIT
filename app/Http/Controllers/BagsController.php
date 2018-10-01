@@ -28,6 +28,7 @@ class BagsController extends Controller
      */
     public function mark($id)
     {
+        if(!\App\PermissionEnforcer::Protect("bags_mark")) { return response("Unauthorized", 401); }
         $bag = DB::table('bags')
           ->where('id', '=', $id)
           ->update(['marked' => 1]);
@@ -46,6 +47,7 @@ class BagsController extends Controller
      */
     public function unmark($id)
     {
+        if(!\App\PermissionEnforcer::Protect("bags_mark")) { return response("Unauthorized", 401); }
         $bag = DB::table('bags')
           ->where('id', '=', $id)
           ->update(['marked' => 0]);
@@ -64,6 +66,7 @@ class BagsController extends Controller
      */
     public function index()
     {
+      if(!\App\PermissionEnforcer::Protect("deliveries_prep")) { return response("Unauthorized", 401); }
       $users = DB::table('users')
         ->get();
       
@@ -85,6 +88,7 @@ class BagsController extends Controller
      */
     public function unbag($id)
     {
+      if(!\App\PermissionEnforcer::Protect("bags_unbag")) { return response("Unauthorized", 401); }
       // Get bag from ID
       $bag = Bag::find($id);
       // Get backstock ID
@@ -109,6 +113,7 @@ class BagsController extends Controller
      */
     public function destroy($id)
     {
+      if(!\App\PermissionEnforcer::Protect("bags_delete")) { return response("Unauthorized", 401); }
       if(AdminEnforcer::Enforce()){
         return redirect()->route('unauthorized');  
       }
@@ -127,10 +132,7 @@ class BagsController extends Controller
      */
     public function hand_deliver($id)
     {
-      
-      if(AdminEnforcer::Enforce()){
-        return redirect()->route('unauthorized');  
-      }
+      if(!\App\PermissionEnforcer::Protect("bags_hand_deliver")) { return response("Unauthorized", 401); }
       
       // Get bag with ID
       $bag = Bag::find($id);

@@ -1,15 +1,4 @@
-<nav class="no-print navbar navbar-expand-lg navbar-dark fixed-top"
-   @if(Auth::guest())
-      style="background-color: #263238"
-   @else
-      @if(Auth::user()->admin == 1)
-        style="background-color: #3F729B"
-      @else
-        style="background-color: #005e01"
-      @endif
-   @endif
-
-     >
+<nav class="no-print navbar navbar-expand-lg navbar-dark fixed-top" style="background-color: #3F729B">
   <div class="container">
     <a class="navbar-brand" href="#">{{config('app.name', 'ACIT')}}</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,7 +9,7 @@
       @else
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a class="nav-link" href="/dashboard">Dashboard</a>
+          <a class="nav-link" href="/">Dashboard</a>
         </li>
         <!-- Operations -->
         <li class="nav-item dropdown">
@@ -46,7 +35,7 @@
             <a class="dropdown-item" href="{{route('parts.index')}}">Parts</a>
             @if(Auth::user()->admin == 1)
               <a class="dropdown-item" href="/profiles">Profiles</a>
-              @if($config["show_locations"] == 1 || $config["dev_mode"] == 1)
+              @if(config("app.show_locations") == 1 || config("app.dev_mode") == 1)
                 <a class="dropdown-item" href="{{route('locations.index')}}">Locations</a>
               @endif
               <div class="dropdown-divider"></div>
@@ -58,6 +47,22 @@
               <a class="dropdown-item" href="/orders">Orders</a>
               <a class="dropdown-item" href="/deliveries/all">Deliveries</a>
               <a class="dropdown-item" href="/overages">Overages</a>
+            @endif
+          </div>
+        </li>
+        <!-- Data -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Maintenance
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+            <a class="dropdown-item" href="#">Dashboard</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="/maintenance">Log</a>
+            @if(Auth::user()->admin == 1)
+              <div class="dropdown-divider"></div>
+              <a class="dropdown-item" href="{{route('machines.index')}}">Machines</a>
+              <a class="dropdown-item" href="#">Scheduled Tasks</a>
             @endif
           </div>
         </li>
@@ -73,16 +78,26 @@
             <a class="dropdown-item" href="/reports/weekly_scrap">Weekly Scrap Report</a>
           </div>
         </li>
-        @if(Auth::user()->admin == 1)
+        @if(\App\PermissionEnforcer::Protect())
         <!-- Admin -->
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             Admin
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-            <a class="dropdown-item" href="{{route('configuration.index')}}">Configuration</a>
             <div class="dropdown-divider"></div>
             <a class="dropdown-item" href="/users">Users</a>
+          </div>
+        </li>
+        @endif
+        @if(config('app.dev_mode') == 1 && \App\PermissionEnforcer::Protect())
+        <!-- Developer -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Developer
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+            <a class="dropdown-item" href="/permissions">Permissions</a>
           </div>
         </li>
         @endif

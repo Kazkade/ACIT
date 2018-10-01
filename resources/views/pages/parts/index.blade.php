@@ -6,7 +6,7 @@
       <h3>
         Parts
       </h3>
-      @if(Auth::user()->admin = 1)
+      @if(\App\PermissionEnforcer::Protect("parts_create"))
         <a href="#" id="add_new_row" class="btn btn-outline-primary">❖ Add New Part</a>
         <a href="#" id="save_changes" class="btn btn-outline-success">✔ Save Changes</a>
         <span class="text-success ml-2" id="return-message"></span>
@@ -20,7 +20,7 @@
 </div>
 
 <script>
-  
+@if(\App\PermissionEnforcer::Protect("parts_index"))
 var data = [
   @foreach($parts as $row)
     {
@@ -43,7 +43,7 @@ var data = [
   @endforeach
 ];
   
-@if(Auth::user()->admin = 1) 
+@if(\App\PermissionEnforcer::Protect("parts_modify"))
   var editable = true ;
 @else 
   var editable = false ;
@@ -58,10 +58,16 @@ $("#report-table").tabulator({
     {title:"Updated", field:"updated_at", align:"center", width: 180, editor: false},
     {title:"Name", field:"part_name", download: false, align: "left", editor: editable, width: 350},
     {title:"Serial", field:"part_serial", align:"center", width: 150, editor: editable},
-    {title:"Color", field:"part_color", align:"center", width: 180, editor:"select", editorParams:{
-      @foreach($filaments as $filament)
-        "{{$filament->filament_name}}":"{{$filament->filament_name}}",
-      @endforeach
+    {title:"Color", field:"part_color", align:"center", width: 180, editor:
+      @if(\App\PermissionEnforcer::Protect("parts_modify"))
+        "select",
+      @else
+        false,
+      @endif
+      editorParams:{
+        @foreach($filaments as $filament)
+          "{{$filament->filament_name}}":"{{$filament->filament_name}}",
+        @endforeach
     }},
     {title:"Version", field:"part_version", align:"center", editor: false, visible: false},
     {title:"Cleaned", field:"part_cleaned", align:"center", formatter:"tickCross", editor: editable},
@@ -146,24 +152,27 @@ $('#save_changes').on('click', function() {
     }
   });
 });
+@endif
   
-$('#add_new_row').on('click', function() {
-  var o = {
-    "status":"new", 
-    "part_name":"New Part", 
-    "part_serial":"XX-XX0000", 
-    "part_color": "Black",
-    "part_version": "0.0.0",
-    "part_mass": 0,
-    "recommended_bagging":100, 
-    "part_waste":0, 
-    "part_cleaned":0, 
-    "part_stock": 0, 
-    "part_bags": 0, 
-    "part_total": 0
-  }
-  $("#report-table").tabulator("addRow", o, true);
-});
-
+@if(\App\PermissionEnforcer::Protect("parts_create"))
+  $('#add_new_row').on('click', function() {
+    var o = {
+      "status":"new", 
+      "part_name":"New Part", 
+      "part_serial":"XX-XX0000", 
+      "part_color": "Black",
+      "part_version": "0.0.0",
+      "part_mass": 0,
+      "recommended_bagging":100, 
+      "part_waste":0, 
+      "part_cleaned":0, 
+      "part_stock": 0, 
+      "part_bags": 0, 
+      "part_total": 0
+    }
+    $("#report-table").tabulator("addRow", o, true);
+  });
+@endif
+  
 </script>
 @endsection

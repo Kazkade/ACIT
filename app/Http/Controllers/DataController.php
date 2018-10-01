@@ -27,6 +27,7 @@ class DataController extends Controller
      */
     public function reset_inventory($authorization_code)
     {
+      if(!\App\PermissionEnforcer::Protect("reset_inventories")) { return response("Unauthorized", 401); }
       $reset = 1;
       $codes = DB::table('database_reset_codes')->get();
       foreach($codes as $code)

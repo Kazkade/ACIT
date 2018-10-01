@@ -28,6 +28,7 @@ class DeliveryController extends Controller
      */
     public function index()
     { 
+      if(!\App\PermissionEnforcer::Protect("deliveries_index")) { return response("Unauthorized", 401); }
       DB::enableQueryLog();
       
       // Quantity Delivered
@@ -90,6 +91,7 @@ class DeliveryController extends Controller
      */
     public function all()
     {
+      if(!\App\PermissionEnforcer::Protect("deliveries_index")) { return response("Unauthorized", 401); }
       $deliveries = DB::table('deliveries')
         ->join('users', 'users.id', '=', 'deliveries.user_id')
         ->join('bags', 'bags.delivery_id', '=', 'deliveries.id')
@@ -117,6 +119,7 @@ class DeliveryController extends Controller
      */
     public function show($id)
     {
+      if(!\App\PermissionEnforcer::Protect("deliveries_index")) { return response("Unauthorized", 401); }
       DB::enableQueryLog();
       
       $delivery = DB::table('deliveries')
